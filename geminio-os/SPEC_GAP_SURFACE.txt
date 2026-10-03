@@ -1,0 +1,91 @@
+# Current Surface Audit
+
+## Route files
+app/(tabs)/_layout.tsx
+app/(tabs)/chat.tsx
+app/(tabs)/discover.tsx
+app/(tabs)/index.tsx
+app/(tabs)/notifications.tsx
+app/(tabs)/profile.tsx
+app/(tabs)/settings.tsx
+app/(tabs)/studio.tsx
+app/(tabs)/tools.tsx
+app/(tabs)/workspace.tsx
+app/_layout.tsx
+app/admin-dashboard.tsx
+app/advanced-video-editor.tsx
+app/agents-screen.tsx
+app/ai-agent-builder.tsx
+app/ai-guardian.tsx
+app/analytics.tsx
+app/app-builder.tsx
+app/auth-screen.tsx
+app/automation-center.tsx
+app/automation-screen.tsx
+app/business-screen.tsx
+app/code-studio-screen.tsx
+app/communication-screen.tsx
+app/content-studio.tsx
+app/dapp-builder.tsx
+app/database-builder.tsx
+app/dev/theme-lab.tsx
+app/error-boundary.tsx
+app/global-search.tsx
+app/goal-tracking.tsx
+app/job-work-tools.tsx
+app/knowledge-graph.tsx
+app/knowledge-screen.tsx
+app/knowledge-vault.tsx
+app/learning-screen.tsx
+app/live-build-studio.tsx
+app/marketplace-community.tsx
+app/media-studio-screen.tsx
+app/multi-agent-system.tsx
+app/oauth/callback.tsx
+app/onboarding.tsx
+app/opportunity-finder.tsx
+app/permissions-screen.tsx
+app/productivity-screen.tsx
+app/profile/settings.tsx
+app/research-agent.tsx
+app/research-screen.tsx
+app/task-management.tsx
+app/voice-assistant.tsx
+app/voice-os-screen.tsx
+app/wallet-analytics.tsx
+app/wallet.tsx
+app/website-builder.tsx
+app/workflow-builder.tsx
+app/workspace/[product].tsx
+
+## Server routers and procedures
+options.query
+protectedProcedure.query
+publicProcedure.mutation
+publicProcedure.query
+req.query
+result.query
+
+## Schema tables
+8:export const users = mysqlTable("users", {
+29:export const profiles = mysqlTable("profiles", {
+44:export const projects = mysqlTable("projects", {
+60:export const tasks = mysqlTable("tasks", {
+76:export const goals = mysqlTable("goals", {
+92:export const messages = mysqlTable("messages", {
+105:export const media = mysqlTable("media", {
+119:export const transactions = mysqlTable("transactions", {
+134:export const notifications = mysqlTable("notifications", {
+148:export const auditLogs = mysqlTable("auditLogs", {
+162:export const marketplaceItems = mysqlTable("marketplaceItems", {
+179:export const permissions = mysqlTable("permissions", {
+192:export const devices = mysqlTable("devices", {
+205:export const subscriptions = mysqlTable("subscriptions", {
+
+## Existing tests
+auth.logout.test.ts
+builders.test.ts
+comprehensive.test.ts
+integration.test.ts
+performance.test.ts
+

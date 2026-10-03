@@ -1,0 +1,1 @@
+ALTER TABLE `usageRecords` ADD CONSTRAINT `usage_request_user_unique` UNIQUE(`requestId`,`userId`);

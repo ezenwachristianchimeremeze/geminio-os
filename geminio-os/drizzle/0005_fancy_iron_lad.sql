@@ -1,0 +1,2 @@
+ALTER TABLE `agentTasks` MODIFY COLUMN `state` enum('queued','planning','running','waiting_for_user','testing','completed','cancelled','failed','retrying') NOT NULL DEFAULT 'queued';--> statement-breakpoint
+ALTER TABLE `aiQueueJobs` MODIFY COLUMN `status` enum('queued','leased','running','succeeded','cancelled','failed','dead_letter') NOT NULL DEFAULT 'queued';

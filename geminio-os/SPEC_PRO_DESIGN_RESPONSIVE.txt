@@ -1,0 +1,569 @@
+                                                           GEMINIO OS
+                    COMPLETE PROFESSIONAL UI/UX DESIGN SYSTEM & RESPONSIVE SPECIFICATION
+
+
+ Version 1.0 • Exact positioning • spacing • sizing • navigation hierarchy • responsive behavior • visual consistency
+
+     Document                              Geminio OS Complete Professional UI/UX Design System & Responsive Specification
+
+     Purpose                               One authoritative visual and interaction system for every Geminio OS screen and module.
+
+     Primary rule                          Screens use shared design tokens, layout grid, navigation hierarchy and component rules; screens must not
+                                           invent their own geometry.
+
+     Status                                Professional implementation specification
+
+
+ Important: Where the Blueprint does not specify a pixel-level value, the values in this document are explicit design-system decisions for
+ implementation, not claims that they already existed in the Blueprint.
+
+ The Blueprint describes a mobile-first, responsive system spanning Android, iOS, tablet, desktop and web, with light/dark modes.
+ ■filecite■turn10file5■L494-L501■
+
+
+
+
+Geminio OS • Professional UI/UX Design System & Responsive Specification v1.0                                                                          Page 1
+ 1. Design Objective
+  • Every screen follows the same geometry and navigation rules.
+
+  • Equivalent actions appear in equivalent locations.
+
+  • Icons do not shift arbitrarily between screens.
+
+  • Profile/account access uses one global position.
+
+  • Content aligns to one shared grid.
+
+  • Cards, buttons, inputs, dialogs and sheets use shared components.
+
+  • Responsive behavior changes layout deliberately.
+
+  • New AI-generated screens inherit the design system.
+
+
+ 2. Global Layout Grid
+         Token                             Mobile                                    Tablet                       Desktop/Web
+
+         Outer gutter                      16 px                                     24 px                        32 px
+
+         Grid columns                      4                                         8                            12
+
+         Column gap                        12 px                                     16 px                        24 px
+
+         Section gap                       24 px                                     32 px                        40 px
+
+         Content max width                 Full width minus gutters                  Full width minus gutters     1200 px recommended max
+
+
+ All major content blocks must align to the grid. Avoid arbitrary per-screen offsets.
+
+
+ 3. Global Screen Anatomy
+     Region                         Mobile                                         Tablet                         Desktop/Web
+
+     Top bar                        56 px                                          64 px                          64 px
+
+     Primary navigation             Bottom navigation                              Bottom or compact rail         Left rail
+
+     Main content                   Scrollable                                     Scrollable                     Scrollable
+
+     Profile                        Top-right                                      Top-right                      Upper-right account area
+
+     Floating action                Optional/contextual                            Optional/contextual            Optional/contextual
+
+
+ Fixed-position rule: Global header, profile control and primary navigation occupy fixed component slots. Responsive breakpoints may
+ change the navigation pattern, but equivalent controls do not randomly move.
+
+
+ 4. Header & Profile Specification
+  • Header height: 56 px mobile; 64 px tablet/desktop.
+
+  • Header uses standard left, center and right slots.
+
+  • Profile/avatar is anchored top-right by default.
+
+  • Avatar: 32 px standard; 36 px desktop; minimum touch target 44 × 44 px.
+
+  • Back/title/action structure is identical across detail screens.
+
+  • Header padding follows the global outer gutter.
+
+
+ 5. Primary Navigation
+ The Blueprint defines Home, Workspace, Discover, Notifications and Profile as the primary navigation structure. ■filecite■turn10file3■L337-L354■
+
+     Priority                Destination                              Purpose
+
+     1                       Home                                     AI-first entry point and daily activity.
+
+
+
+
+Geminio OS • Professional UI/UX Design System & Responsive Specification v1.0                                                                       Page 2
+     Priority              Destination                              Purpose
+
+     2                     Workspace                                Projects, files, tasks and work in progress.
+
+     3                     Discover                                 Products, tools, content and opportunities.
+
+     4                     Notifications                            Task updates, messages, alerts and system events.
+
+     5                     Profile                                  Account, settings, identity and preferences.
+
+
+      Viewport                  Pattern                                         Rule
+
+      0–599 px                  Bottom navigation                               Five primary destinations; stable order and labels.
+
+      600–1023 px               Bottom navigation or compact rail               Choose one product-wide pattern; do not mix arbitrarily.
+
+      1024–1439 px              Left rail                                       Primary destinations remain visible.
+
+      1440 px+                  Expanded left rail                              Labels may be visible; main content remains centered.
+
+
+
+
+ 6. Icon System
+     Element                                                Standard
+
+     Primary/navigation icon                                24 px visual box
+
+     Compact icon                                           20 px
+
+     Large feature icon                                     32 px
+
+     Touch target                                           Minimum 44 × 44 px
+
+     Icon-to-label gap                                      8 px
+
+     Icon-only button                                       44 × 44 px minimum
+
+
+  • Use one icon family and stroke/weight language.
+
+  • Same semantic action = same icon size and placement everywhere.
+
+  • Icon-only controls require accessible labels/tooltips where needed.
+
+  • Do not substitute decorative icons for functional controls.
+
+
+ 7. Typography
+     Token                                    Size / line height                       Use
+
+     Display                                  32 / 40 px                               Major product/landing headings
+
+     H1                                       28 / 36 px                               Page heading
+
+     H2                                       22 / 28 px                               Section heading
+
+     H3                                       18 / 24 px                               Card/module heading
+
+     Body                                     16 / 24 px                               Primary content
+
+     Body Small                               14 / 20 px                               Secondary content
+
+     Caption                                  12 / 16 px                               Metadata/helper text
+
+     Button                                   14–16 px                                 Action labels
+
+
+
+
+ 8. Spacing
+     Token                            Value                           Typical use
+
+     XS                               4 px                            Micro spacing
+
+     S                                8 px                            Icon/text gaps
+
+
+
+
+Geminio OS • Professional UI/UX Design System & Responsive Specification v1.0                                                              Page 3
+     Token                         Value                            Typical use
+
+     M                             12 px                            Compact component gaps
+
+     L                             16 px                            Default padding/gutter
+
+     XL                            24 px                            Cards/sections
+
+     2XL                           32 px                            Major sections
+
+     3XL                           40 px                            Desktop section separation
+
+     4XL                           48 px                            Large page rhythm
+
+
+
+
+ 9. Component Sizing
+     Component                                       Standard
+
+     Primary button                                  48 px height; 16 px horizontal padding
+
+     Secondary button                                44–48 px height
+
+     Input/select                                    48 px height
+
+     Search                                          48 px height
+
+     Card radius                                     16 px
+
+     Button/input radius                             12 px
+
+     Modal radius                                    16–20 px
+
+     Divider                                         1 px
+
+     Avatar                                          32 px standard; 40–48 px prominent
+
+
+
+
+ 10. AI Interaction UI
+ The Blueprint specifies an AI-first home/chat experience with prompt box, voice, attachments, suggested actions, reasoning, memory and file/image
+ handling. ■filecite■turn10file3■L356-L374■
+
+     Element                                   Placement
+
+     AI input                                  Bottom of conversation area, full available width within gutter
+
+     Attachment                                Left side of input row
+
+     Voice                                     Right-side action in input row
+
+     Send                                      Rightmost action
+
+     Suggested actions                         Below greeting/empty state or approved prompt area
+
+     Task status                               Inside the relevant task/conversation area
+
+
+ Similar AI screens must use the same control order and placement.
+
+
+ 11. Cards, Buttons & Forms
+  • One primary action per major region.
+
+  • Use shared button variants; no module-specific geometry.
+
+  • Card padding: 16 px mobile; 20–24 px desktop where density permits.
+
+  • Form label above field; 8 px label gap; helper/error below.
+
+  • Validation is not communicated by color alone.
+
+  • Loading preserves component dimensions.
+
+
+ 12. Modal, Sheet & State Rules
+
+
+Geminio OS • Professional UI/UX Design System & Responsive Specification v1.0                                                                        Page 4
+  • Use dialogs for focused confirmation/decisions.
+
+  • Use bottom sheets for contextual mobile actions.
+
+  • Use shared loading, empty, error and success components.
+
+  • Errors preserve user input where possible and provide recovery.
+
+  • Destructive actions use the shared confirmation pattern.
+
+
+ 13. Responsive Behavior
+ The Blueprint requires responsive Android/iOS/tablet/desktop/web layouts and light/dark modes. ■filecite■turn10file5■L494-L501■
+
+  • Mobile: single-column content, bottom navigation, full-width primary actions.
+
+  • Tablet: more columns and optional split views for workflows that benefit from simultaneous context.
+
+  • Desktop: persistent left navigation, centered content and multi-column layouts where appropriate.
+
+  • Wide desktop: increase whitespace rather than stretching text/control widths indefinitely.
+
+  • Tables become scrollable or transform into cards on narrow screens.
+
+  • Side panels collapse into sheets on narrow screens.
+
+  • No horizontal overflow or overlapping controls at supported sizes.
+
+
+ 14. Split-View Rules
+     Viewport                       Behavior
+
+     Mobile                         Single column; secondary content below or in sheet.
+
+     Tablet                         Optional 60/40 or 50/50 split for approved workflows.
+
+     Desktop                        Primary/secondary split with readable minimum widths.
+
+     Wide desktop                   Keep content within max-width; do not stretch text indefinitely.
+
+
+
+
+ 15. Alignment Rules
+  • Page titles share one content edge.
+
+  • Cards align to the same grid.
+
+  • Forms share common left/right edges.
+
+  • Primary actions align consistently within their action group.
+
+  • Icon-only controls occupy identical touch-target boxes.
+
+  • Profile placement follows the global header rule.
+
+  • Prefer normal layout systems over arbitrary absolute positioning.
+
+
+ 16. Design Tokens
+     Token group                        Includes
+
+     Color                              Background, surface, text, border, primary, success, warning, error
+
+     Typography                         Family, size, weight, line height, letter spacing
+
+     Spacing                            4/8 px scale
+
+     Radius                             Input, button, card, modal, avatar
+
+     Elevation                          Card, modal, popover
+
+     Icons                              Sizes, stroke/weight, semantic mapping
+
+     Motion                             Duration, easing, reduced-motion
+
+     Breakpoints                        Responsive transitions
+
+
+
+
+Geminio OS • Professional UI/UX Design System & Responsive Specification v1.0                                                      Page 5
+     Token group                        Includes
+
+     Z-index                            Header, nav, modal, toast, overlay
+
+
+ Every color, spacing value, radius and component dimension should come from tokens rather than arbitrary screen-level values.
+
+
+ 17. Theme & Accessibility
+  • Light and dark modes preserve the same hierarchy.
+
+  • Semantic colors remain consistent across modules.
+
+  • Controls meet accessible contrast requirements.
+
+  • Minimum interactive target is 44 × 44 px.
+
+  • Keyboard focus is visible on desktop/web.
+
+  • Important information is not conveyed by color alone.
+
+  • Text remains usable with increased display/font scaling.
+
+  • Icons and images requiring interpretation have accessible labels.
+
+
+ 18. Navigation & Back Behavior
+  • Back returns to the previous meaningful context.
+
+  • Deep links preserve valid route/history state.
+
+  • Tabs preserve selected state where appropriate.
+
+  • Unsaved changes use the shared confirmation pattern.
+
+  • Notifications and AI actions open the exact relevant destination.
+
+
+ 19. Cross-Module Consistency
+     Element                                Required standard
+
+     Header                                 Shared global header
+
+     Profile                                Shared placement/control
+
+     Navigation                             Shared primary hierarchy
+
+     Buttons                                Shared variants
+
+     Inputs                                 Shared form components
+
+     Cards                                  Shared card primitives
+
+     Alerts                                 Shared alert/toast/dialog
+
+     Loading                                Shared skeleton/spinner
+
+     Errors                                 Shared retry/recovery pattern
+
+     Typography                             Shared scale
+
+     Spacing                                Shared tokens
+
+     Icons                                  Shared library and sizes
+
+
+
+
+ 20. AI-Generated Screen Governance
+ Geminio OS includes an AI Builder, so generated interfaces must be constrained by the design system.
+
+  • Generated screens must reference design tokens.
+
+  • Generated screens must use approved navigation/header/footer components.
+
+  • Generated controls must use approved component variants.
+
+
+
+
+Geminio OS • Professional UI/UX Design System & Responsive Specification v1.0                                                    Page 6
+  • The builder must not invent a new navigation pattern without approval.
+
+  • Automated UI validation should flag unsupported variants and arbitrary spacing values.
+
+  • Important screens should have visual regression baselines.
+
+
+ 21. Visual Regression
+  • Capture approved screenshots at defined viewport sizes.
+
+  • Compare release candidates against approved baselines.
+
+  • Flag icon movement, spacing drift, typography changes, component-size changes and navigation changes.
+
+  • Review intentional changes before updating baselines.
+
+  • Test both light and dark themes.
+
+
+ 22. Required Viewport Validation
+     Class                            Representative viewport                    Checks
+
+     Small phone                      360 × 800                                  No overflow; fixed header/nav; readable controls
+
+     Large phone                      430 × 932                                  Consistent spacing and density
+
+     Tablet portrait                  768 × 1024                                 Grid expansion and navigation
+
+     Tablet landscape                 1024 × 768                                 Split-view and transition behavior
+
+     Laptop                           1366 × 768                                 Left rail + content alignment
+
+     Desktop                          1440 × 900                                 Max-width and whitespace
+
+     Wide desktop                     1920 × 1080                                No uncontrolled stretching
+
+
+
+
+ 23. UI Acceptance Checklist
+  • Correct header/navigation template.
+
+  • Profile in defined global position.
+
+  • Correct icon size and touch target.
+
+  • Spacing follows tokens.
+
+  • Typography follows shared scale.
+
+  • Primary/secondary actions are consistent.
+
+  • No overlap at supported viewports.
+
+  • Light/dark themes preserve hierarchy.
+
+  • Loading/empty/error/success states implemented where needed.
+
+  • Keyboard/touch/accessibility checks pass.
+
+  • Visual regression passes.
+
+  • No unapproved component or navigation pattern.
+
+
+ 24. Definition of Done for Every New Screen
+     Requirement                          Done when
+
+     Structure                            Approved template/navigation used.
+
+     Geometry                             Grid and spacing tokens used.
+
+     Components                           Approved components only.
+
+     Responsive                           Required viewport classes validated.
+
+     Themes                               Light and dark validated.
+
+
+
+
+Geminio OS • Professional UI/UX Design System & Responsive Specification v1.0                                                       Page 7
+     Requirement                          Done when
+
+     States                               Required states implemented.
+
+     Accessibility                        Keyboard/focus/touch/labels pass.
+
+     Regression                           Visual and functional regression pass.
+
+     Approval                             Product/design owner accepts.
+
+
+
+
+ 25. AI Builder Implementation Directive
+ Build Geminio OS using this document as the global UI/UX authority. Before creating or modifying a screen, apply the shared design
+ tokens, grid, component library, navigation templates, responsive rules and accessibility rules. Do not invent screen-specific positioning
+ when an existing system component applies.
+
+ Do not stop at screen generation. Continue implementation, visual validation, responsive testing, regression testing and correction until
+ all in-scope screens comply with this specification.
+
+ Professional completion means: consistent positioning, equal spacing, fixed icon/profile placement, stable navigation hierarchy, correct
+ sizing, responsive behavior, light/dark consistency and no unintended UI drift.
+
+
+ 26. Relationship to Other Geminio OS Specifications
+     Specification                                  Role
+
+     Master Blueprint                               Vision, product scope, modules and strategic architecture.
+
+     Functional Specification                       What each feature must do.
+
+     Technical & Integration Specification          How services, data, APIs, AI infrastructure and integrations are implemented.
+
+     Testing & Acceptance Specification             How the implementation is verified and accepted.
+
+     This UI/UX Specification                       How the interface is structured, positioned, sized, navigated and adapted responsively.
+
+
+
+
+ 27. Final Professional Standard
+ Geminio OS should feel like one operating environment, not dozens of separately designed applications. Chat, AI Builder,
+ Workspace, Media Studio, Marketplace, Wallet, Developer tools and future modules must share the same grid, spacing, component
+ geometry, icon language, profile placement, navigation hierarchy, theme system, responsive behavior and interaction states.
+
+   END OF GEMINIO OS COMPLETE PROFESSIONAL UI/UX DESIGN SYSTEM & RESPONSIVE SPECIFICATION
+                                       — VERSION 1.0
+
+ Source-derived items include the Blueprint's primary navigation, AI-first home/chat structure, responsive platform scope and light/dark modes. Pixel values,
+ breakpoints and component geometry above are explicit implementation design decisions added to make the requested professional system precise.
+
+
+
+
+Geminio OS • Professional UI/UX Design System & Responsive Specification v1.0                                                                            Page 8
+
