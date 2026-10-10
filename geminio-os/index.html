@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ezenwa Christian Chimeremeze - Professional Portfolio</title>
+    <title>Ezenwa Christian Chimeremeze - Technical Writer & Full-Stack Developer</title>
     <style>
         :root {
             --bg-navy: #0B132B;
@@ -22,62 +22,163 @@
         }
         header {
             text-align: center;
-            padding: 40px 20px;
+            padding: 50px 20px;
             border-bottom: 2px solid var(--gold);
         }
-        .profile-img {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            border: 3px solid var(--gold);
-            object-fit: cover;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-        h1 { color: var(--gold); margin: 10px 0 5px 0; font-size: 2rem; }
-        .title { color: var(--text-gray); font-size: 1.1rem; margin-bottom: 20px; }
+        h1 { color: var(--gold); margin: 10px 0 5px 0; font-size: 2.2rem; }
+        .tagline { color: var(--gold); font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; }
+        .subtitle { color: var(--text-gray); font-size: 1.05rem; margin-bottom: 20px; }
         .container { max-width: 800px; margin: 0 auto; padding: 20px 0; }
-        .card {
+        .section {
             background: var(--card-navy);
             border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
             border-left: 4px solid var(--gold);
         }
+        h2 { color: var(--gold); margin-top: 0; }
+        .skills-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .skill-tag {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        .project-item, .writing-item {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(160, 174, 192, 0.2);
+        }
+        .project-item:last-child, .writing-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .project-num { color: var(--gold); font-weight: bold; font-size: 0.9rem; }
         a { color: var(--gold); text-decoration: none; }
         a:hover { text-decoration: underline; }
-        .btn {
-            display: inline-block;
-            background: var(--gold);
-            color: var(--bg-navy);
-            padding: 10px 20px;
-            border-radius: 4px;
-            font-weight: bold;
-            margin-top: 10px;
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            border-top: 1px solid rgba(160, 174, 192, 0.2);
+            color: var(--text-gray);
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
     <header>
-        <!-- Recruiter Hero Section with Profile Photo -->
-        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop" alt="Ezenwa Christian Chimeremeze" class="profile-img">
-        <h1>Ezenwa Christian Chimeremeze</h1>
-        <div class="title">Full-Stack Software Developer, Python Engineer & Technical Author</div>
-        <p style="color: var(--text-gray); max-width: 600px; margin: 0 auto 20px auto;">
-            Building production-ready applications, type-safe LLM integrations, and robust cloud/offline synchronization systems.
+        <h1>EZENWA CHRISTIAN CHIMEREMEZE</h1>
+        <div class="tagline">Building · Writing · Engineering · Exploring AI</div>
+        <div class="subtitle">Technical Writer · Full-Stack Developer · AI & Robotics Builder</div>
+        <p style="color: var(--text-gray); max-width: 650px; margin: 0 auto;">
+            I build technology and explain how it works. My work sits at the intersection of software development, technical writing, artificial intelligence, automation, edge AI, and robotics.
         </p>
-        <a href="https://ezenwa-christian.netlify.app" class="btn" target="_blank">View Portfolio Hub</a>
     </header>
+
     <div class="container">
-        <div class="card">
-            <h2>Geminio OS Platform</h2>
-            <p>A hybrid offline edge/cloud synchronization platform featuring Home Universal AI Chat, credit ledger architecture, tRPC procedures, and Pydantic data schemas.</p>
-            <a href="dashboard/index.html">Open AI Dashboard &rarr;</a>
+        <!-- About Section -->
+        <div class="section">
+            <h2>About</h2>
+            <p><strong>Understanding systems. Building them. Explaining them.</strong></p>
+            <p>I'm Ezenwa Christian Chimeremeze, a Nigerian Technical Writer and Full-Stack Developer interested in understanding how technology works from the inside out—and then explaining it clearly.</p>
+            <p>I began seriously learning programming and technology in April 2023. Since then, I've explored software development, APIs, artificial intelligence, automation, developer documentation, edge computing, embedded systems, and robotics.</p>
+            <p>I enjoy working at the point where engineering and communication meet: understanding a technical system, designing or building it, and turning the complexity into documentation that developers can actually use.</p>
+            <p>My long-term goal is to contribute to and build practical AI, robotics, and automation technologies that can solve meaningful problems in Africa and beyond.</p>
         </div>
-        <div class="card">
-            <h2>Technical Writing & Engineering</h2>
-            <p>Specialized in building deterministic LLM function-calling integrations, Termux mobile cloud automation, and publishing production-ready tutorials on SitePoint and Medium.</p>
+
+        <!-- Skills Section -->
+        <div class="section">
+            <h2>Areas I Work With</h2>
+            <div class="skills-grid">
+                <span class="skill-tag">Python</span>
+                <span class="skill-tag">JavaScript</span>
+                <span class="skill-tag">TypeScript</span>
+                <span class="skill-tag">React</span>
+                <span class="skill-tag">React Native</span>
+                <span class="skill-tag">Node.js</span>
+                <span class="skill-tag">FastAPI</span>
+                <span class="skill-tag">REST APIs</span>
+                <span class="skill-tag">LLM Function Calling</span>
+                <span class="skill-tag">Automation</span>
+                <span class="skill-tag">AI</span>
+                <span class="skill-tag">Edge AI</span>
+                <span class="skill-tag">Computer Vision</span>
+                <span class="skill-tag">Robotics</span>
+                <span class="skill-tag">Embedded Systems</span>
+                <span class="skill-tag">Technical Documentation</span>
+                <span class="skill-tag">Git</span>
+                <span class="skill-tag">GitHub</span>
+            </div>
+        </div>
+
+        <!-- Selected Work Section -->
+        <div class="section">
+            <h2>Selected Work</h2>
+            <p style="color: var(--text-gray); margin-bottom: 20px;">Projects I'm building and exploring. My projects combine software engineering, documentation, artificial intelligence, automation, and robotics.</p>
+            
+            <div class="project-item">
+                <div class="project-num">01 · AI SOFTWARE SYSTEM</div>
+                <h3>Geminio OS</h3>
+                <p>An AI-first operating-system concept focused on helping users with software development, productivity, automation, learning, and device workflows.</p>
+                <a href="https://github.com/christianfever31-commits" target="_blank">View on GitHub →</a>
+            </div>
+
+            <div class="project-item">
+                <div class="project-num">02 · ROBOTICS</div>
+                <h3>Autonomous Research Robot</h3>
+                <p>A planned 4WD autonomous research robot combining Raspberry Pi, ESP32, ROS 2, computer vision, sensors, voice interaction, autonomous navigation, and a robotic arm.</p>
+            </div>
+
+            <div class="project-item">
+                <div class="project-num">03 · TECHNICAL WRITING</div>
+                <h3>Engineering Articles</h3>
+                <p>Technical articles exploring AI systems, LLM function calling, automation, software architecture, APIs, programmatic SEO, and practical engineering concepts.</p>
+                <a href="https://ezenwachristianchimeremeze.medium.com" target="_blank">Read My Writing →</a>
+            </div>
+        </div>
+
+        <!-- Writing Section -->
+        <div class="section">
+            <h2>Writing</h2>
+            <p style="color: var(--text-gray); margin-bottom: 20px;">Technical ideas, explained clearly. I write about the engineering decisions behind modern software and AI systems.</p>
+            
+            <div class="writing-item">
+                <h3>Why Building AI Products Is More Than Connecting an API</h3>
+                <p style="color: var(--text-gray); font-size: 0.95rem;">Exploring the engineering work behind useful AI products.</p>
+            </div>
+
+            <div class="writing-item">
+                <h3>Why Function Calling Is More Important Than Prompt Engineering</h3>
+                <p style="color: var(--text-gray); font-size: 0.95rem;">Exploring structured AI workflows and reliable system behavior.</p>
+            </div>
+
+            <div class="writing-item">
+                <h3>Building Practical AI and Automation Systems</h3>
+                <p style="color: var(--text-gray); font-size: 0.95rem;">Notes and experiments from my software and AI engineering work.</p>
+            </div>
+        </div>
+
+        <!-- Connect Section -->
+        <div class="section" style="text-align: center;">
+            <h2>Let's connect.</h2>
+            <p>I'm interested in technical writing, developer documentation, software development, AI, automation, edge AI, and robotics. You can explore my work through the links below.</p>
+            <div style="margin-top: 20px; display: flex; justify-content: center; gap: 20px;">
+                <a href="https://github.com/christianfever31-commits" target="_blank">GitHub</a>
+                <a href="https://ezenwachristianchimeremeze.medium.com" target="_blank">Medium</a>
+            </div>
         </div>
     </div>
+
+    <footer>
+        <p>© 2026 EZENWA CHRISTIAN CHIMEREMEZE<br>Technical Writer · Full-Stack Developer · AI & Robotics</p>
+    </footer>
 </body>
 </html>
