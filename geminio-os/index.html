@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ezenwa Christian Chimeremeze - Geminio OS Portfolio</title>
+    <title>Ezenwa Christian Chimeremeze - Professional Portfolio</title>
     <style>
         :root {
             --bg-navy: #0B132B;
@@ -25,7 +25,17 @@
             padding: 40px 20px;
             border-bottom: 2px solid var(--gold);
         }
-        h1 { color: var(--gold); margin-bottom: 10px; }
+        .profile-img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 3px solid var(--gold);
+            object-fit: cover;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        h1 { color: var(--gold); margin: 10px 0 5px 0; font-size: 2rem; }
+        .title { color: var(--text-gray); font-size: 1.1rem; margin-bottom: 20px; }
         .container { max-width: 800px; margin: 0 auto; padding: 20px 0; }
         .card {
             background: var(--card-navy);
@@ -49,9 +59,14 @@
 </head>
 <body>
     <header>
+        <!-- Recruiter Hero Section with Profile Photo -->
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop" alt="Ezenwa Christian Chimeremeze" class="profile-img">
         <h1>Ezenwa Christian Chimeremeze</h1>
-        <p>Full-Stack Software Developer, Python Engineer & Technical Author</p>
-        <a href="https://ezenwa-christian.netlify.app" class="btn" target="_blank">View Netlify Portfolio</a>
+        <div class="title">Full-Stack Software Developer, Python Engineer & Technical Author</div>
+        <p style="color: var(--text-gray); max-width: 600px; margin: 0 auto 20px auto;">
+            Building production-ready applications, type-safe LLM integrations, and robust cloud/offline synchronization systems.
+        </p>
+        <a href="https://ezenwa-christian.netlify.app" class="btn" target="_blank">View Portfolio Hub</a>
     </header>
     <div class="container">
         <div class="card">
