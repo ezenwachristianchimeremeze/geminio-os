@@ -113,9 +113,9 @@ export default function CommunicationScreen() {
             <Text
               className={`text-xs font-semibold ${
                 message.status === 'draft'
-                  ? 'text-warning'
+                  ? 'text-warningText'
                   : message.status === 'sent'
-                    ? 'text-success'
+                    ? 'text-successText'
                     : 'text-primary'
               }`}
             >
@@ -160,7 +160,7 @@ export default function CommunicationScreen() {
               <Text
                 className={`text-center font-semibold text-sm ${
                   activeTab === 'contacts'
-                    ? 'text-white'
+                    ? 'text-primaryForeground'
                     : 'text-foreground'
                 }`}
               >
@@ -178,7 +178,7 @@ export default function CommunicationScreen() {
               <Text
                 className={`text-center font-semibold text-sm ${
                   activeTab === 'messages'
-                    ? 'text-white'
+                    ? 'text-primaryForeground'
                     : 'text-foreground'
                 }`}
               >
@@ -196,7 +196,7 @@ export default function CommunicationScreen() {
               <Text
                 className={`text-center font-semibold text-sm ${
                   activeTab === 'calendar'
-                    ? 'text-white'
+                    ? 'text-primaryForeground'
                     : 'text-foreground'
                 }`}
               >
@@ -228,7 +228,7 @@ export default function CommunicationScreen() {
                 ]}
                 className="bg-primary rounded-2xl p-4 items-center mt-2"
               >
-                <Text className="text-white font-semibold">
+                <Text className="text-primaryForeground font-semibold">
                   + Add Contact
                 </Text>
               </Pressable>
@@ -257,7 +257,7 @@ export default function CommunicationScreen() {
                 ]}
                 className="bg-primary rounded-2xl p-4 items-center mt-2"
               >
-                <Text className="text-white font-semibold">
+                <Text className="text-primaryForeground font-semibold">
                   + Compose Message
                 </Text>
               </Pressable>
@@ -281,7 +281,7 @@ export default function CommunicationScreen() {
                 ]}
                 className="bg-primary rounded-lg p-3 items-center mt-2"
               >
-                <Text className="text-white font-semibold">
+                <Text className="text-primaryForeground font-semibold">
                   Connect Calendar
                 </Text>
               </Pressable>

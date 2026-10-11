@@ -8,3 +8,11 @@
 - **Validation recorded by checkpoint:** TypeScript passed; lint passed with zero errors and 70 non-blocking warnings; 137 tests passed with 1 intentionally skipped authentication test; production server build passed; API health returned 200; managed development services were running; Home, Workspace, Notifications, and protected Live Builder browser routes rendered without browser console errors.
 - **Export rule:** Source files were copied from `git archive HEAD` into this handoff staging directory. Documentation and `.env.example` were added only to the handoff export; the application repository was not modified.
 - **Excluded:** `.git`, `node_modules`, build output, caches, operational logs, secrets, credentials, private keys, and certificates.
+
+---
+## Checkpoint — consolidation (2026-10-03)
+Single canonical tree = handoff base + ai-builder libs + E routers. Static checks only (syntax + import scan). Full verification pending.
+
+---
+## Checkpoint — Dev Preview (2026-10-03)
+Offline tests: 34/34 (shim). Real toolchain: not run (registry 403). Matrix: 13% implemented / 0% verified.

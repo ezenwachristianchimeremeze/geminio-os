@@ -160,7 +160,7 @@ export default function SettingsScreen() {
             ]}
             className="bg-error rounded-2xl p-4 items-center"
           >
-            <Text className="text-white font-semibold text-lg">
+            <Text className="text-errorForeground font-semibold text-lg">
               Logout
             </Text>
           </Pressable>

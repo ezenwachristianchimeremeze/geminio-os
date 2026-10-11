@@ -32,11 +32,11 @@ export default function PermissionsScreen() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'granted':
-        return 'text-success';
+        return 'text-successText';
       case 'denied':
-        return 'text-error';
+        return 'text-errorText';
       case 'blocked':
-        return 'text-warning';
+        return 'text-warningText';
       default:
         return 'text-muted';
     }
@@ -135,7 +135,7 @@ export default function PermissionsScreen() {
                           className="flex-1 bg-primary rounded-lg py-2 items-center"
                           style={({ pressed }) => [pressed && { opacity: 0.8 }]}
                         >
-                          <Text className="text-white text-sm font-semibold">Grant</Text>
+                          <Text className="text-primaryForeground text-sm font-semibold">Grant</Text>
                         </Pressable>
                       )}
                       {permission.status === 'granted' && (
@@ -144,7 +144,7 @@ export default function PermissionsScreen() {
                           className="flex-1 bg-error rounded-lg py-2 items-center"
                           style={({ pressed }) => [pressed && { opacity: 0.8 }]}
                         >
-                          <Text className="text-white text-sm font-semibold">Revoke</Text>
+                          <Text className="text-errorForeground text-sm font-semibold">Revoke</Text>
                         </Pressable>
                       )}
                     </View>

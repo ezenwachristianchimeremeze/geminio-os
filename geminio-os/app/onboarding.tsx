@@ -176,7 +176,7 @@ export default function OnboardingScreen() {
             ]}
             className={`${currentStep > 0 ? "flex-1" : "flex-1"} bg-primary rounded-lg p-3 items-center`}
           >
-            <Text className="text-white font-semibold">
+            <Text className="text-primaryForeground font-semibold">
               {currentStep === ONBOARDING_STEPS.length - 1 ? "Get Started →" : "Next →"}
             </Text>
           </Pressable>

@@ -54,7 +54,7 @@ export default function MediaStudioScreen() {
                 activeTab === 'image' ? 'bg-primary' : 'bg-surface'
               }`}
             >
-              <Text className={activeTab === 'image' ? 'text-white font-semibold' : 'text-foreground font-semibold'}>
+              <Text className={activeTab === 'image' ? 'text-primaryForeground font-semibold' : 'text-foreground font-semibold'}>
                 📷 Image
               </Text>
             </Pressable>
@@ -64,7 +64,7 @@ export default function MediaStudioScreen() {
                 activeTab === 'video' ? 'bg-primary' : 'bg-surface'
               }`}
             >
-              <Text className={activeTab === 'video' ? 'text-white font-semibold' : 'text-foreground font-semibold'}>
+              <Text className={activeTab === 'video' ? 'text-primaryForeground font-semibold' : 'text-foreground font-semibold'}>
                 🎬 Video
               </Text>
             </Pressable>
@@ -77,9 +77,9 @@ export default function MediaStudioScreen() {
                 <Text className="text-sm font-semibold text-foreground">Project: {currentProject.name}</Text>
                 <Text className={`text-xs ${
                   currentProject.status === 'completed'
-                    ? 'text-success'
+                    ? 'text-successText'
                     : currentProject.status === 'failed'
-                    ? 'text-error'
+                    ? 'text-errorText'
                     : 'text-muted'
                 }`}>
                   Status: {currentProject.status}
@@ -128,7 +128,7 @@ export default function MediaStudioScreen() {
                 {isGenerating ? (
                   <ActivityIndicator color="white" />
                 ) : (
-                  <Text className="text-white font-semibold">Generate {activeTab === 'image' ? 'Image' : 'Video'}</Text>
+                  <Text className="text-primaryForeground font-semibold">Generate {activeTab === 'image' ? 'Image' : 'Video'}</Text>
                 )}
               </Pressable>
 
@@ -176,7 +176,7 @@ export default function MediaStudioScreen() {
                           settings.quality === q ? 'bg-primary' : 'bg-border'
                         }`}
                       >
-                        <Text className={settings.quality === q ? 'text-white text-xs font-semibold' : 'text-foreground text-xs'}>
+                        <Text className={settings.quality === q ? 'text-primaryForeground text-xs font-semibold' : 'text-foreground text-xs'}>
                           {q.charAt(0).toUpperCase() + q.slice(1)}
                         </Text>
                       </Pressable>
@@ -196,7 +196,7 @@ export default function MediaStudioScreen() {
                           settings.style === style ? 'bg-primary' : 'bg-border'
                         }`}
                       >
-                        <Text className={settings.style === style ? 'text-white text-xs font-semibold' : 'text-foreground text-xs'}>
+                        <Text className={settings.style === style ? 'text-primaryForeground text-xs font-semibold' : 'text-foreground text-xs'}>
                           {style.charAt(0).toUpperCase() + style.slice(1)}
                         </Text>
                       </Pressable>
@@ -216,7 +216,7 @@ export default function MediaStudioScreen() {
                           settings.aspectRatio === ratio ? 'bg-primary' : 'bg-border'
                         }`}
                       >
-                        <Text className={settings.aspectRatio === ratio ? 'text-white text-xs font-semibold' : 'text-foreground text-xs'}>
+                        <Text className={settings.aspectRatio === ratio ? 'text-primaryForeground text-xs font-semibold' : 'text-foreground text-xs'}>
                           {ratio}
                         </Text>
                       </Pressable>
@@ -237,7 +237,7 @@ export default function MediaStudioScreen() {
                 onPress={() => handleCreateProject(activeTab)}
                 className="bg-primary rounded-lg px-3 py-2"
               >
-                <Text className="text-white text-xs font-semibold">+ New</Text>
+                <Text className="text-primaryForeground text-xs font-semibold">+ New</Text>
               </Pressable>
             </View>
 
@@ -261,9 +261,9 @@ export default function MediaStudioScreen() {
                 </View>
                 <Text className={`text-xs ${
                   project.status === 'completed'
-                    ? 'text-success'
+                    ? 'text-successText'
                     : project.status === 'failed'
-                    ? 'text-error'
+                    ? 'text-errorText'
                     : 'text-muted'
                 }`}>
                   {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
@@ -279,7 +279,7 @@ export default function MediaStudioScreen() {
                   onPress={() => handleCreateProject(activeTab)}
                   className="bg-primary rounded-lg px-4 py-2 mt-2"
                 >
-                  <Text className="text-white text-sm font-semibold">Create First {activeTab}</Text>
+                  <Text className="text-primaryForeground text-sm font-semibold">Create First {activeTab}</Text>
                 </Pressable>
               </View>
             )}

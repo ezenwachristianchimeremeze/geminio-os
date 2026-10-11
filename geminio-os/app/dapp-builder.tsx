@@ -192,7 +192,7 @@ export default function DAppBuilderScreen() {
             style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
             className="flex-1 bg-primary rounded-lg py-2 items-center"
           >
-            <Text className="text-white font-semibold text-sm">Generate</Text>
+            <Text className="text-primaryForeground font-semibold text-sm">Generate</Text>
           </Pressable>
           <Pressable
             onPress={() => handleDeployContract(dapp.id, dapp.smartContracts[0]?.id || '')}
@@ -322,7 +322,7 @@ export default function DAppBuilderScreen() {
                       selectedBlockchain === chain ? 'bg-primary border-primary' : 'bg-surface border-border'
                     }`}
                   >
-                    <Text className={`text-xs font-semibold ${selectedBlockchain === chain ? 'text-white' : 'text-foreground'}`}>
+                    <Text className={`text-xs font-semibold ${selectedBlockchain === chain ? 'text-primaryForeground' : 'text-foreground'}`}>
                       {chain.charAt(0).toUpperCase() + chain.slice(1)}
                     </Text>
                   </Pressable>
@@ -345,7 +345,7 @@ export default function DAppBuilderScreen() {
                 style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                 className="flex-1 bg-primary rounded-lg py-3 items-center"
               >
-                <Text className="text-white font-semibold">Create</Text>
+                <Text className="text-primaryForeground font-semibold">Create</Text>
               </Pressable>
             </View>
           </View>

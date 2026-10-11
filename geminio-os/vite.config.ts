@@ -9,6 +9,11 @@ export default defineConfig({
   },
   test: {
     globals: true,
-    environment: "jsdom",
+    // Every suite here tests server/shared/client *logic* and uses Node APIs (fetch, FormData, Blob, node:sqlite,
+    // real sockets). jsdom would replace FormData/Blob/AbortController with incompatible implementations and break
+    // those tests, so run in plain Node. A suite that truly needs a DOM can opt in with `// @vitest-environment jsdom`.
+    environment: "node",
+    include: ["tests/**/*.test.ts"],
+    exclude: ["**/node_modules/**", "dist/**"],
   },
 });

@@ -126,13 +126,13 @@ export default function JobWorkToolsScreen() {
   const getStatusTextColor = (status: string) => {
     switch (status) {
       case 'offer':
-        return 'text-success';
+        return 'text-successText';
       case 'interview':
         return 'text-primary';
       case 'applied':
-        return 'text-accent';
+        return 'text-accentText';
       case 'rejected':
-        return 'text-error';
+        return 'text-errorText';
       default:
         return 'text-muted';
     }
@@ -222,7 +222,7 @@ export default function JobWorkToolsScreen() {
                     style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                     className="flex-1 bg-primary rounded-lg py-3 items-center"
                   >
-                    <Text className="text-white font-semibold">+ Track Job</Text>
+                    <Text className="text-primaryForeground font-semibold">+ Track Job</Text>
                   </Pressable>
                   <Pressable
                     onPress={handleInterviewCoach}
@@ -250,13 +250,13 @@ export default function JobWorkToolsScreen() {
                       <Text className="text-xs text-muted">Total</Text>
                     </View>
                     <View>
-                      <Text className="text-2xl font-bold text-accent">
+                      <Text className="text-2xl font-bold text-accentText">
                         {applications.filter(a => a.status === 'interview').length}
                       </Text>
                       <Text className="text-xs text-muted">Interviews</Text>
                     </View>
                     <View>
-                      <Text className="text-2xl font-bold text-success">
+                      <Text className="text-2xl font-bold text-successText">
                         {applications.filter(a => a.status === 'offer').length}
                       </Text>
                       <Text className="text-xs text-muted">Offers</Text>
@@ -278,11 +278,11 @@ export default function JobWorkToolsScreen() {
                     <View className="flex-row items-center gap-3">
                       <Text className="text-2xl">📄</Text>
                       <View>
-                        <Text className="font-semibold text-white">Resume Builder</Text>
-                        <Text className="text-xs text-white/80">Create professional resume</Text>
+                        <Text className="font-semibold text-primaryForeground">Resume Builder</Text>
+                        <Text className="text-xs text-primaryForeground">Create professional resume</Text>
                       </View>
                     </View>
-                    <Text className="text-white">→</Text>
+                    <Text className="text-primaryForeground">→</Text>
                   </Pressable>
 
                   <Pressable
@@ -293,11 +293,11 @@ export default function JobWorkToolsScreen() {
                     <View className="flex-row items-center gap-3">
                       <Text className="text-2xl">✉️</Text>
                       <View>
-                        <Text className="font-semibold text-white">Cover Letter</Text>
-                        <Text className="text-xs text-white/80">Generate personalized letter</Text>
+                        <Text className="font-semibold text-primaryForeground">Cover Letter</Text>
+                        <Text className="text-xs text-primaryForeground">Generate personalized letter</Text>
                       </View>
                     </View>
-                    <Text className="text-white">→</Text>
+                    <Text className="text-primaryForeground">→</Text>
                   </Pressable>
 
                   <Pressable
@@ -308,11 +308,11 @@ export default function JobWorkToolsScreen() {
                     <View className="flex-row items-center gap-3">
                       <Text className="text-2xl">📊</Text>
                       <View>
-                        <Text className="font-semibold text-white">Report Generator</Text>
-                        <Text className="text-xs text-white/80">Create professional reports</Text>
+                        <Text className="font-semibold text-primaryForeground">Report Generator</Text>
+                        <Text className="text-xs text-primaryForeground">Create professional reports</Text>
                       </View>
                     </View>
-                    <Text className="text-white">→</Text>
+                    <Text className="text-primaryForeground">→</Text>
                   </Pressable>
 
                   <Pressable
@@ -323,11 +323,11 @@ export default function JobWorkToolsScreen() {
                     <View className="flex-row items-center gap-3">
                       <Text className="text-2xl">🎯</Text>
                       <View>
-                        <Text className="font-semibold text-white">Presentation Builder</Text>
-                        <Text className="text-xs text-white/80">Build slide presentations</Text>
+                        <Text className="font-semibold text-primaryForeground">Presentation Builder</Text>
+                        <Text className="text-xs text-primaryForeground">Build slide presentations</Text>
                       </View>
                     </View>
-                    <Text className="text-white">→</Text>
+                    <Text className="text-primaryForeground">→</Text>
                   </Pressable>
                 </View>
 
@@ -380,7 +380,7 @@ export default function JobWorkToolsScreen() {
                 style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                 className="flex-1 bg-primary rounded-lg py-3 items-center"
               >
-                <Text className="text-white font-semibold">Add</Text>
+                <Text className="text-primaryForeground font-semibold">Add</Text>
               </Pressable>
             </View>
           </View>

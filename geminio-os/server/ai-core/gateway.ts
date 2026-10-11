@@ -1,10 +1,10 @@
 import { aiCoreRequestSchema } from "../../shared/geminio-contracts";
 import { listCapabilities } from "./capabilities";
-import { cancelAiRun, executeQueuedJob, retryAiRun, runAiWorkerOnce, submitAiRequest } from "./orchestrator";
+import { cancelAiRun, executeQueuedJob, retryAiRun, runAiWorkerOnce, submitAiRequest, type SubmitOptions } from "./orchestrator";
 import { getOrchestrationRun, getOrchestrationRunByTaskId, listAiJobsForRun, listOrchestrationRuns, listProviderAttemptsForRun, listTaskCheckpointsForRun, listTaskEvents, recoverExpiredAiJobLeases } from "./persistence";
 
-export async function submitGatewayRequest(userId: number, input: unknown) {
-  return submitAiRequest(userId, aiCoreRequestSchema.parse(input));
+export async function submitGatewayRequest(userId: number, input: unknown, options?: SubmitOptions) {
+  return submitAiRequest(userId, aiCoreRequestSchema.parse(input), options);
 }
 
 export async function getGatewayRun(userId: number, runId: string) {

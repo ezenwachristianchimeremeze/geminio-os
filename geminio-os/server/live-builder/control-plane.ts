@@ -66,7 +66,7 @@ export type WorkerLease = {
 };
 
 export interface ExecutionProvider {
-  readonly name: "development" | "container" | "microvm";
+  readonly name: "development" | "container" | "microvm" | "local-process";
   readonly configured: boolean;
   start(job: RunnerJob, policy: ExecutionPolicy): Promise<{ status: "ready" | "unavailable" | "failed"; message: string }>;
   stop(job: RunnerJob): Promise<void>;

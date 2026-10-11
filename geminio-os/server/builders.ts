@@ -1,10 +1,11 @@
 import { z } from "zod";
-import { publicProcedure, router } from "./_core/trpc";
-import { invokeLLM } from "./_core/llm";
+import { protectedProcedure, router } from "./_core/trpc";
+import { onceLLM } from "./credits/metered-llm";
+import { idempotencyKeySchema } from "./credits/key-schema";
 
 // App Builder Router
 export const appBuilderRouter = router({
-  createApp: publicProcedure
+  createApp: protectedProcedure
     .input(
       z.object({
         name: z.string().min(1),
@@ -12,7 +13,7 @@ export const appBuilderRouter = router({
         screens: z.array(z.string()),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       try {
         return {
           success: true,
@@ -26,11 +27,11 @@ export const appBuilderRouter = router({
       }
     }),
 
-  generateCode: publicProcedure
-    .input(z.object({ appId: z.string() }))
-    .mutation(async ({ input }) => {
+  generateCode: protectedProcedure
+    .input(z.object({ idempotencyKey: idempotencyKeySchema.optional(), appId: z.string() }))
+    .mutation(async ({ input, ctx }) => {
       try {
-        const response = await invokeLLM({
+        const response = await onceLLM(ctx.user.id, "legacy.builders.generateCode", input.idempotencyKey, {
           messages: [
             {
               role: "system",
@@ -57,7 +58,7 @@ export const appBuilderRouter = router({
 
 // Website Builder Router
 export const websiteBuilderRouter = router({
-  createWebsite: publicProcedure
+  createWebsite: protectedProcedure
     .input(
       z.object({
         name: z.string().min(1),
@@ -65,7 +66,7 @@ export const websiteBuilderRouter = router({
         pages: z.array(z.string()),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       try {
         return {
           success: true,
@@ -80,11 +81,11 @@ export const websiteBuilderRouter = router({
       }
     }),
 
-  generateHTML: publicProcedure
-    .input(z.object({ websiteId: z.string() }))
-    .mutation(async ({ input }) => {
+  generateHTML: protectedProcedure
+    .input(z.object({ idempotencyKey: idempotencyKeySchema.optional(), websiteId: z.string() }))
+    .mutation(async ({ input, ctx }) => {
       try {
-        const response = await invokeLLM({
+        const response = await onceLLM(ctx.user.id, "legacy.builders.generateHTML", input.idempotencyKey, {
           messages: [
             {
               role: "system",
@@ -111,7 +112,7 @@ export const websiteBuilderRouter = router({
 
 // Workflow Builder Router
 export const workflowBuilderRouter = router({
-  createWorkflow: publicProcedure
+  createWorkflow: protectedProcedure
     .input(
       z.object({
         name: z.string().min(1),
@@ -119,7 +120,7 @@ export const workflowBuilderRouter = router({
         steps: z.number().min(1),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       try {
         return {
           success: true,
@@ -134,9 +135,9 @@ export const workflowBuilderRouter = router({
       }
     }),
 
-  testWorkflow: publicProcedure
+  testWorkflow: protectedProcedure
     .input(z.object({ workflowId: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       try {
         return {
           success: true,
@@ -152,7 +153,7 @@ export const workflowBuilderRouter = router({
 
 // Database Builder Router
 export const databaseBuilderRouter = router({
-  createDatabase: publicProcedure
+  createDatabase: protectedProcedure
     .input(
       z.object({
         name: z.string().min(1),
@@ -160,7 +161,7 @@ export const databaseBuilderRouter = router({
         tables: z.number().min(1),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       try {
         return {
           success: true,
@@ -175,11 +176,11 @@ export const databaseBuilderRouter = router({
       }
     }),
 
-  generateSQL: publicProcedure
-    .input(z.object({ databaseId: z.string() }))
-    .mutation(async ({ input }) => {
+  generateSQL: protectedProcedure
+    .input(z.object({ idempotencyKey: idempotencyKeySchema.optional(), databaseId: z.string() }))
+    .mutation(async ({ input, ctx }) => {
       try {
-        const response = await invokeLLM({
+        const response = await onceLLM(ctx.user.id, "legacy.builders.generateSQL", input.idempotencyKey, {
           messages: [
             {
               role: "system",
@@ -206,7 +207,7 @@ export const databaseBuilderRouter = router({
 
 // AI Agent Builder Router
 export const aiAgentBuilderRouter = router({
-  createAgent: publicProcedure
+  createAgent: protectedProcedure
     .input(
       z.object({
         name: z.string().min(1),
@@ -214,7 +215,7 @@ export const aiAgentBuilderRouter = router({
         capabilities: z.array(z.string()),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       try {
         return {
           success: true,
@@ -229,16 +230,16 @@ export const aiAgentBuilderRouter = router({
       }
     }),
 
-  testAgent: publicProcedure
+  testAgent: protectedProcedure
     .input(
-      z.object({
+      z.object({ idempotencyKey: idempotencyKeySchema.optional(),
         agentId: z.string(),
         prompt: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       try {
-        const response = await invokeLLM({
+        const response = await onceLLM(ctx.user.id, "legacy.builders.testAgent", input.idempotencyKey, {
           messages: [
             {
               role: "system",
@@ -262,9 +263,9 @@ export const aiAgentBuilderRouter = router({
       }
     }),
 
-  deployAgent: publicProcedure
+  deployAgent: protectedProcedure
     .input(z.object({ agentId: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       try {
         return {
           success: true,
@@ -280,7 +281,7 @@ export const aiAgentBuilderRouter = router({
 
 // Project Management Router
 export const projectManagementRouter = router({
-  saveProject: publicProcedure
+  saveProject: protectedProcedure
     .input(
       z.object({
         name: z.string().min(1),
@@ -288,7 +289,7 @@ export const projectManagementRouter = router({
         data: z.record(z.string(), z.any()),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       try {
         return {
           success: true,
@@ -302,14 +303,14 @@ export const projectManagementRouter = router({
       }
     }),
 
-  exportProject: publicProcedure
+  exportProject: protectedProcedure
     .input(
       z.object({
         projectId: z.string(),
         format: z.enum(["zip", "json", "tar"]),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       try {
         return {
           success: true,
@@ -322,14 +323,14 @@ export const projectManagementRouter = router({
       }
     }),
 
-  deployProject: publicProcedure
+  deployProject: protectedProcedure
     .input(
       z.object({
         projectId: z.string(),
         platform: z.enum(["web", "mobile", "desktop"]),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       try {
         return {
           success: true,

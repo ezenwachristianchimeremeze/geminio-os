@@ -161,7 +161,7 @@ export default function ChatScreen() {
         ) : (
           <Text
             className={`text-base ${
-              message.isUser ? "text-white" : "text-foreground"
+              message.isUser ? "text-primaryForeground" : "text-foreground"
             }`}
           >
             {message.text}

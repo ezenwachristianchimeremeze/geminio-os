@@ -165,7 +165,7 @@ export default function AgentsScreen() {
             ]}
             className="bg-primary rounded-2xl p-4 items-center mt-4"
           >
-            <Text className="text-white font-semibold text-lg">
+            <Text className="text-primaryForeground font-semibold text-lg">
               🚀 Launch Agent Team
             </Text>
           </Pressable>

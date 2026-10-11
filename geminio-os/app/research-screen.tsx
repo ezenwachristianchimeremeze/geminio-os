@@ -77,8 +77,8 @@ export default function ResearchScreen() {
           }`}>
             <Text className={`text-xs font-semibold ${
               result.type === 'research' ? 'text-primary' :
-              result.type === 'trend' ? 'text-accent' :
-              'text-warning'
+              result.type === 'trend' ? 'text-accentText' :
+              'text-warningText'
             }`}>
               {result.type}
             </Text>
@@ -152,7 +152,7 @@ export default function ResearchScreen() {
               <Text
                 className={`text-center font-semibold text-sm ${
                   activeTab === 'research'
-                    ? 'text-white'
+                    ? 'text-primaryForeground'
                     : 'text-foreground'
                 }`}
               >
@@ -170,7 +170,7 @@ export default function ResearchScreen() {
               <Text
                 className={`text-center font-semibold text-sm ${
                   activeTab === 'trends'
-                    ? 'text-white'
+                    ? 'text-primaryForeground'
                     : 'text-foreground'
                 }`}
               >
@@ -188,7 +188,7 @@ export default function ResearchScreen() {
               <Text
                 className={`text-center font-semibold text-sm ${
                   activeTab === 'competitors'
-                    ? 'text-white'
+                    ? 'text-primaryForeground'
                     : 'text-foreground'
                 }`}
               >

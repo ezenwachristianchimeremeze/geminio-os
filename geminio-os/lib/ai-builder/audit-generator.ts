@@ -1,0 +1,305 @@
+/**
+ * Audit Report Generator
+ * Generates comprehensive audit reports for projects
+ */
+
+import type { ProjectAudit, Project } from './types';
+
+export class AuditReportGenerator {
+  /**
+   * Generate markdown audit report
+   */
+  static generateMarkdownReport(audit: ProjectAudit): string {
+    return `# Project Audit Report
+
+**Project:** ${audit.projectName}  
+**Framework:** ${audit.framework}  
+**Version:** ${audit.version}  
+**Generated:** ${audit.generatedAt.toLocaleString()}
+
+---
+
+## Project Overview
+
+| Metric | Value |
+|--------|-------|
+| Total Files | ${audit.totalFiles} |
+| Total Screens | ${audit.totalScreens} |
+| Total Components | ${audit.totalComponents} |
+| Total Services | ${audit.totalServices} |
+| Total APIs | ${audit.totalAPIs} |
+| Backend Routers | ${audit.totalBackendRouters} |
+| Database Tables | ${audit.totalDatabaseTables} |
+| Production Readiness | ${audit.productionReadiness}% |
+
+---
+
+## Feature Analysis
+
+### Completed Features
+${audit.completedFeatures.map((f) => `- ✅ ${f}`).join('\n')}
+
+### Partially Completed Features
+${audit.partialFeatures.map((f) => `- ⏳ ${f}`).join('\n')}
+
+### Missing Features
+${audit.missingFeatures.map((f) => `- ❌ ${f}`).join('\n')}
+
+---
+
+## AI & Voice Capabilities
+
+### AI Features
+${audit.aiFeatures.length > 0 ? audit.aiFeatures.map((f) => `- 🤖 ${f}`).join('\n') : '- No AI features detected'}
+
+### Voice Features
+${audit.voiceFeatures.length > 0 ? audit.voiceFeatures.map((f) => `- 🎤 ${f}`).join('\n') : '- No voice features detected'}
+
+### Security Features
+${audit.securityFeatures.length > 0 ? audit.securityFeatures.map((f) => `- 🔒 ${f}`).join('\n') : '- No security features detected'}
+
+---
+
+## Testing Status
+
+| Test Type | Count |
+|-----------|-------|
+| Unit Tests | ${audit.testingStatus.unitTests} |
+| Integration Tests | ${audit.testingStatus.integrationTests} |
+| E2E Tests | ${audit.testingStatus.e2eTests} |
+| Coverage | ${audit.testingStatus.coverage}% |
+| Passing | ${audit.testingStatus.passing} |
+| Failing | ${audit.testingStatus.failing} |
+
+---
+
+## Issues & Technical Debt
+
+### Bugs (${audit.bugs.length})
+${audit.bugs.length > 0 ? audit.bugs.map((b) => `- **[${b.severity.toUpperCase()}]** ${b.title} (${b.file}:${b.line})`).join('\n') : '- No bugs detected'}
+
+### Build Errors (${audit.buildErrors.length})
+${audit.buildErrors.length > 0 ? audit.buildErrors.map((e) => `- ${e.file}:${e.line} - ${e.message}`).join('\n') : '- No build errors'}
+
+### Runtime Errors (${audit.runtimeErrors.length})
+${audit.runtimeErrors.length > 0 ? audit.runtimeErrors.map((e) => `- ${e.type}: ${e.message} (${e.frequency} occurrences)`).join('\n') : '- No runtime errors'}
+
+### Technical Debt (${audit.technicalDebt.length})
+${audit.technicalDebt.length > 0 ? audit.technicalDebt.map((t) => `- **[${t.severity}]** ${t.description} (${t.estimatedHours}h)`).join('\n') : '- No technical debt identified'}
+
+---
+
+## Production Readiness
+
+**Overall Readiness:** ${audit.productionReadiness}%
+
+### Readiness Checklist
+
+- ${audit.totalScreens > 0 ? '✅' : '❌'} Screens Implemented (${audit.totalScreens})
+- ${audit.totalComponents > 0 ? '✅' : '❌'} Components Created (${audit.totalComponents})
+- ${audit.totalBackendRouters > 0 ? '✅' : '❌'} Backend Routers (${audit.totalBackendRouters})
+- ${audit.totalDatabaseTables > 0 ? '✅' : '❌'} Database Tables (${audit.totalDatabaseTables})
+- ${audit.aiFeatures.length > 0 ? '✅' : '❌'} AI Features (${audit.aiFeatures.length})
+- ${audit.voiceFeatures.length > 0 ? '✅' : '❌'} Voice Features (${audit.voiceFeatures.length})
+- ${audit.securityFeatures.length > 0 ? '✅' : '❌'} Security Features (${audit.securityFeatures.length})
+- ${audit.testingStatus.unitTests > 0 ? '✅' : '❌'} Unit Tests (${audit.testingStatus.unitTests})
+- ${audit.testingStatus.e2eTests > 0 ? '✅' : '❌'} E2E Tests (${audit.testingStatus.e2eTests})
+- ${audit.buildErrors.length === 0 ? '✅' : '❌'} No Build Errors
+- ${audit.runtimeErrors.length === 0 ? '✅' : '❌'} No Runtime Errors
+- ${audit.bugs.length === 0 ? '✅' : '❌'} No Critical Bugs
+
+---
+
+## Recommendations
+
+### Immediate Actions (High Priority)
+${this.generateRecommendations(audit).slice(0, 3).map((r) => `1. ${r}`).join('\n')}
+
+### Short-term Improvements (Medium Priority)
+${this.generateRecommendations(audit).slice(3, 6).map((r, i) => `${i + 1}. ${r}`).join('\n')}
+
+### Long-term Enhancements (Low Priority)
+${this.generateRecommendations(audit).slice(6).map((r, i) => `${i + 1}. ${r}`).join('\n')}
+
+---
+
+## Estimated Remaining Work
+
+**Total Hours:** ${audit.estimatedRemainingHours}h  
+**Estimated Days:** ${Math.ceil(audit.estimatedRemainingHours / 8)} days (8h/day)  
+**Estimated Weeks:** ${Math.ceil(audit.estimatedRemainingHours / 40)} weeks (40h/week)
+
+---
+
+## Next Steps
+
+1. Review this audit report
+2. Prioritize recommendations
+3. Create implementation plan
+4. Begin development
+5. Track progress
+6. Re-audit after major milestones
+
+---
+
+*Report generated by Geminio OS AI Builder*
+`;
+  }
+
+  /**
+   * Generate recommendations based on audit
+   */
+  private static generateRecommendations(audit: ProjectAudit): string[] {
+    const recommendations: string[] = [];
+
+    if (audit.totalBackendRouters === 0) {
+      recommendations.push('Implement backend routers for API endpoints');
+    }
+
+    if (audit.totalDatabaseTables === 0) {
+      recommendations.push('Design and create database schema');
+    }
+
+    if (audit.buildErrors.length > 0) {
+      recommendations.push(`Fix ${audit.buildErrors.length} build errors`);
+    }
+
+    if (audit.runtimeErrors.length > 0) {
+      recommendations.push(`Resolve ${audit.runtimeErrors.length} runtime errors`);
+    }
+
+    if (audit.bugs.length > 0) {
+      recommendations.push(`Fix ${audit.bugs.length} identified bugs`);
+    }
+
+    if (audit.testingStatus.unitTests === 0) {
+      recommendations.push('Add unit tests for components and utilities');
+    }
+
+    if (audit.testingStatus.e2eTests === 0) {
+      recommendations.push('Implement end-to-end tests for user workflows');
+    }
+
+    if (audit.aiFeatures.length === 0) {
+      recommendations.push('Integrate AI features for enhanced functionality');
+    }
+
+    if (audit.voiceFeatures.length === 0) {
+      recommendations.push('Add voice capabilities for accessibility');
+    }
+
+    if (audit.securityFeatures.length < 3) {
+      recommendations.push('Enhance security measures and add encryption');
+    }
+
+    if (audit.productionReadiness < 50) {
+      recommendations.push('Complete core features before production deployment');
+    }
+
+    if (audit.technicalDebt.length > 0) {
+      recommendations.push('Address technical debt to improve code quality');
+    }
+
+    return recommendations.slice(0, 12);
+  }
+
+  /**
+   * Generate JSON audit report
+   */
+  static generateJSONReport(audit: ProjectAudit): string {
+    return JSON.stringify(audit, null, 2);
+  }
+
+  /**
+   * Generate HTML audit report
+   */
+  static generateHTMLReport(audit: ProjectAudit): string {
+    const markdown = this.generateMarkdownReport(audit);
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>${audit.projectName} - Audit Report</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 1200px; margin: 0 auto; padding: 20px; }
+    h1 { border-bottom: 3px solid #007bff; padding-bottom: 10px; }
+    h2 { margin-top: 30px; color: #007bff; }
+    table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    th { background-color: #f5f5f5; font-weight: bold; }
+    .success { color: #28a745; }
+    .warning { color: #ffc107; }
+    .danger { color: #dc3545; }
+    .metric { display: inline-block; margin: 10px 20px 10px 0; }
+    .progress-bar { background-color: #e9ecef; border-radius: 4px; height: 20px; overflow: hidden; }
+    .progress-fill { background-color: #007bff; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>${audit.projectName} - Project Audit Report</h1>
+  <p><strong>Framework:</strong> ${audit.framework} | <strong>Version:</strong> ${audit.version} | <strong>Generated:</strong> ${audit.generatedAt.toLocaleString()}</p>
+  
+  <h2>Project Overview</h2>
+  <div class="metric">
+    <strong>Total Files:</strong> ${audit.totalFiles}
+  </div>
+  <div class="metric">
+    <strong>Screens:</strong> ${audit.totalScreens}
+  </div>
+  <div class="metric">
+    <strong>Components:</strong> ${audit.totalComponents}
+  </div>
+  <div class="metric">
+    <strong>Production Readiness:</strong>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width: ${audit.productionReadiness}%">${audit.productionReadiness}%</div>
+    </div>
+  </div>
+
+  <h2>Features</h2>
+  <h3>Completed</h3>
+  <ul>${audit.completedFeatures.map((f) => `<li class="success">✅ ${f}</li>`).join('')}</ul>
+  
+  <h3>Partial</h3>
+  <ul>${audit.partialFeatures.map((f) => `<li class="warning">⏳ ${f}</li>`).join('')}</ul>
+  
+  <h3>Missing</h3>
+  <ul>${audit.missingFeatures.map((f) => `<li class="danger">❌ ${f}</li>`).join('')}</ul>
+</body>
+</html>
+    `;
+  }
+
+  /**
+   * Generate summary for conversation
+   */
+  static generateConversationSummary(audit: ProjectAudit): string {
+    return `Boss, I analyzed your project. Here's what I found:
+
+**Project:** ${audit.projectName}
+**Framework:** ${audit.framework} v${audit.version}
+
+**Current State:**
+- ${audit.totalScreens} screens implemented
+- ${audit.totalComponents} reusable components
+- ${audit.totalBackendRouters} backend routers
+- ${audit.totalDatabaseTables} database tables
+
+**Completed Features:** ${audit.completedFeatures.join(', ')}
+**Partially Done:** ${audit.partialFeatures.join(', ')}
+**Still Needed:** ${audit.missingFeatures.join(', ')}
+
+**Production Readiness:** ${audit.productionReadiness}%
+
+**Estimated Remaining Work:** ${audit.estimatedRemainingHours} hours
+
+I'm ready to continue from where you left off. Would you like me to:
+1. Complete the missing features
+2. Fix the identified issues
+3. Optimize performance
+4. Add tests
+5. Prepare for deployment
+
+What would you like me to focus on?`;
+  }
+}

@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import {
   liveBuilderRuntimeEvents,
   liveBuilderRuntimeSessions,
@@ -14,7 +14,9 @@ import {
 } from "../../shared/geminio-contracts";
 import { getDb } from "../db";
 import { getLiveBuilderWorkspace } from "./service";
-import { createProjectRunner } from "./runner";
+import { createProjectRunner, startRunnerSafely } from "./runner";
+import { assertVersionInWorkspace } from "./runtime-guard";
+import { ChangeSetError } from "./atomic-apply";
 import { appendPersistedRunnerLog, createPersistedPreviewGatewaySession, createPersistedRunnerJob, updatePersistedRunnerJob } from "./persistence";
 import { randomUUID } from "node:crypto";
 import { insertNotification } from "../geminio-data";
@@ -53,7 +55,7 @@ async function ownedSession(userId: RuntimeUserId, sessionId: string): Promise<R
     .where(and(eq(liveBuilderRuntimeSessions.id, sessionId), eq(liveBuilderWorkspaces.userId, userId)))
     .limit(1);
   const session = rows[0]?.session;
-  if (!session) throw new Error("Runtime session not found");
+  if (!session) throw new ChangeSetError("WORKSPACE_UNAVAILABLE", "Runtime session not found");
   return session;
 }
 
@@ -74,10 +76,11 @@ async function appendEvent(sessionId: string, type: string, message: string, dia
   return liveBuilderRuntimeEventSchema.parse({ ...event, createdAt: event.createdAt.toISOString() });
 }
 
-async function updateSession(sessionId: string, patch: Partial<typeof liveBuilderRuntimeSessions.$inferInsert>): Promise<LiveBuilderRuntimeSession> {
+/** `onlyIfStatus` makes the write a compare-and-set: a slow start must not overwrite a session the user stopped (or that already failed) in the meantime. */
+async function updateSession(sessionId: string, patch: Partial<typeof liveBuilderRuntimeSessions.$inferInsert>, onlyIfStatus?: Array<typeof liveBuilderRuntimeSessions.$inferSelect["status"]>): Promise<LiveBuilderRuntimeSession> {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable");
-  await db.update(liveBuilderRuntimeSessions).set({ ...patch, updatedAt: new Date() }).where(eq(liveBuilderRuntimeSessions.id, sessionId));
+  await db.update(liveBuilderRuntimeSessions).set({ ...patch, updatedAt: new Date() }).where(onlyIfStatus ? and(eq(liveBuilderRuntimeSessions.id, sessionId), inArray(liveBuilderRuntimeSessions.status, onlyIfStatus)) : eq(liveBuilderRuntimeSessions.id, sessionId));
   const record = (await db.select().from(liveBuilderRuntimeSessions).where(eq(liveBuilderRuntimeSessions.id, sessionId)).limit(1))[0];
   if (!record) throw new Error("Runtime session disappeared during update");
   return asSession(record);
@@ -85,7 +88,8 @@ async function updateSession(sessionId: string, patch: Partial<typeof liveBuilde
 
 export async function startLiveBuilderRuntime(userId: RuntimeUserId, input: LiveBuilderRuntimeStartInput) {
   const workspace = await getLiveBuilderWorkspace(userId, input.workspaceId);
-  if (!workspace) throw new Error("Live Builder workspace not found");
+  if (!workspace) throw new ChangeSetError("WORKSPACE_UNAVAILABLE", "Live Builder workspace not found");
+  assertVersionInWorkspace(workspace.versions, input.versionId);
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable");
 
@@ -110,8 +114,8 @@ export async function startLiveBuilderRuntime(userId: RuntimeUserId, input: Live
   await appendEvent(sessionId, "starting", "Runtime session is initializing in an isolated preview boundary.");
 
   await appendEvent(sessionId, "build_started", "Preparing the declarative preview document; no project source is executed in the main application process.");
-  const runnerResult = await createProjectRunner(input.engine).start(input);
-  const unavailable = runnerResult.status === "unavailable";
+  const runnerResult = await startRunnerSafely(createProjectRunner(input.engine), input);
+  const unavailable = runnerResult.status !== "ready";
   await updatePersistedRunnerJob(runnerJobId, unavailable ? "failed" : runnerResult.status === "ready" ? "completed" : "failed", { lastError: unavailable ? runnerResult.message : null });
   await appendPersistedRunnerLog({ jobId: runnerJobId, projectId: workspace.projectId, versionId, phase: unavailable ? "failed" : "completed", severity: unavailable ? "warning" : "info", message: runnerResult.message, errorCode: runnerResult.diagnostics[0]?.code ?? null, diagnostics: { diagnostics: runnerResult.diagnostics } });
   const session = await updateSession(sessionId, {
@@ -121,7 +125,13 @@ export async function startLiveBuilderRuntime(userId: RuntimeUserId, input: Live
     url: runnerResult.url,
     lastError: unavailable ? runnerResult.message : null,
     stoppedAt: unavailable ? new Date() : null,
-  });
+  }, ["starting"]);
+  const intended = unavailable ? "failed" : "ready";
+  if (session.status !== intended) {
+    // The session left "starting" while the runner was working (user stop/restart). The stop wins: no ready events, no gateway session, no notification.
+    await appendEvent(sessionId, "start_superseded", `The runner finished but this session was already ${session.status}; its result was discarded.`);
+    return { session, events: await listRuntimeEvents(userId, sessionId), fallback: workspace.preview, runner: runnerResult, runnerJobId, previewSession: null };
+  }
   await appendEvent(sessionId, unavailable ? "build_failed" : "build_succeeded", runnerResult.message, runnerResult.diagnostics);
   await appendEvent(sessionId, unavailable ? "runtime_error" : "runtime_ready", runnerResult.message, runnerResult.diagnostics);
   const previewSession = runnerResult.status === "ready" ? await createPersistedPreviewGatewaySession({ userId, workspaceId: input.workspaceId, versionId, runtimeSessionId: sessionId }) : null;

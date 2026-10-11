@@ -1,4 +1,4 @@
-import { invokeLLM, type InvokeResult, type Message, type Tool } from "../_core/llm";
+import { invokeLLM, invokeLLMStream, type InvokeResult, type Message, type Tool } from "../_core/llm";
 import {
   aiProviderSchema,
   providerFailureSchema,
@@ -16,6 +16,9 @@ export type ProviderRequest = {
     strict?: boolean;
   };
   maxTokens?: number;
+  /** Optional: receive text deltas as they arrive (built-in endpoint only; other adapters ignore it and answer non-streaming). */
+  onText?: (delta: string) => void;
+  signal?: AbortSignal;
 };
 
 export type ProviderResponse = {
@@ -56,13 +59,8 @@ class BuiltInLlmAdapter implements ProviderAdapter {
 
   async invoke(request: ProviderRequest): Promise<ProviderResponse> {
     const startedAt = Date.now();
-    const result = await invokeLLM({
-      messages: request.messages,
-      model: request.model,
-      tools: request.tools,
-      outputSchema: request.outputSchema,
-      maxTokens: request.maxTokens,
-    });
+    const params = { messages: request.messages, model: request.model, tools: request.tools, outputSchema: request.outputSchema, maxTokens: request.maxTokens };
+    const result = request.onText ? await invokeLLMStream(params, request.onText, request.signal) : await invokeLLM(params);
     return {
       provider: this.provider,
       model: result.model || request.model || "builtin-default",

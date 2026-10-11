@@ -225,7 +225,7 @@ export default function WebsiteBuilderScreen() {
             style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
             className="flex-1 bg-primary rounded-lg py-2 items-center"
           >
-            <Text className="text-white font-semibold text-sm">Generate HTML</Text>
+            <Text className="text-primaryForeground font-semibold text-sm">Generate HTML</Text>
           </Pressable>
           <Pressable
             onPress={() => handlePublish(website.id)}
@@ -345,7 +345,7 @@ export default function WebsiteBuilderScreen() {
                 style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                 className="flex-1 bg-primary rounded-lg py-3 items-center"
               >
-                <Text className="text-white font-semibold">Create</Text>
+                <Text className="text-primaryForeground font-semibold">Create</Text>
               </Pressable>
             </View>
           </View>

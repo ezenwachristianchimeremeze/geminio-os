@@ -209,7 +209,7 @@ export default function DatabaseBuilderScreen() {
             style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
             className="flex-1 bg-primary rounded-lg py-2 items-center"
           >
-            <Text className="text-white font-semibold text-sm">Generate SQL</Text>
+            <Text className="text-primaryForeground font-semibold text-sm">Generate SQL</Text>
           </Pressable>
           <Pressable
             onPress={() => handleExportSchema(database.id)}
@@ -337,7 +337,7 @@ export default function DatabaseBuilderScreen() {
                       dbType === type ? 'bg-primary border-primary' : 'bg-surface border-border'
                     }`}
                   >
-                    <Text className={`text-xs font-semibold ${dbType === type ? 'text-white' : 'text-foreground'}`}>
+                    <Text className={`text-xs font-semibold ${dbType === type ? 'text-primaryForeground' : 'text-foreground'}`}>
                       {type.toUpperCase()}
                     </Text>
                   </Pressable>
@@ -360,7 +360,7 @@ export default function DatabaseBuilderScreen() {
                 style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                 className="flex-1 bg-primary rounded-lg py-3 items-center"
               >
-                <Text className="text-white font-semibold">Create</Text>
+                <Text className="text-primaryForeground font-semibold">Create</Text>
               </Pressable>
             </View>
           </View>

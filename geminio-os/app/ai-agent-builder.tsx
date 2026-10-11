@@ -205,7 +205,7 @@ export default function AIAgentBuilderScreen() {
             style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
             className="flex-1 bg-primary rounded-lg py-2 items-center"
           >
-            <Text className="text-white font-semibold text-sm">Deploy</Text>
+            <Text className="text-primaryForeground font-semibold text-sm">Deploy</Text>
           </Pressable>
         </View>
       </View>
@@ -331,7 +331,7 @@ export default function AIAgentBuilderScreen() {
                 style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                 className="flex-1 bg-primary rounded-lg py-3 items-center"
               >
-                <Text className="text-white font-semibold">Create</Text>
+                <Text className="text-primaryForeground font-semibold">Create</Text>
               </Pressable>
             </View>
           </View>

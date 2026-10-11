@@ -49,7 +49,7 @@ export default function ProductivityScreen() {
               : "border-muted"
           }`}
         >
-          {task.completed && <Text className="text-white text-sm">✓</Text>}
+          {task.completed && <Text className="text-successForeground text-sm">✓</Text>}
         </Pressable>
         <View className="flex-1">
           <Text
@@ -80,10 +80,10 @@ export default function ProductivityScreen() {
         <Text
           className={`text-xs font-semibold ${
             task.priority === "high"
-              ? "text-error"
+              ? "text-errorText"
               : task.priority === "medium"
-                ? "text-warning"
-                : "text-success"
+                ? "text-warningText"
+                : "text-successText"
           }`}
         >
           {task.priority}
@@ -145,7 +145,7 @@ export default function ProductivityScreen() {
               <Text
                 className={`text-center font-semibold ${
                   activeTab === "tasks"
-                    ? "text-white"
+                    ? "text-primaryForeground"
                     : "text-foreground"
                 }`}
               >
@@ -163,7 +163,7 @@ export default function ProductivityScreen() {
               <Text
                 className={`text-center font-semibold ${
                   activeTab === "goals"
-                    ? "text-white"
+                    ? "text-primaryForeground"
                     : "text-foreground"
                 }`}
               >
@@ -187,7 +187,7 @@ export default function ProductivityScreen() {
                   ]}
                   className="bg-primary rounded-2xl p-4 items-center"
                 >
-                  <Text className="text-white font-semibold">
+                  <Text className="text-primaryForeground font-semibold">
                     + Add New Task
                   </Text>
                 </Pressable>
@@ -208,7 +208,7 @@ export default function ProductivityScreen() {
                       onPress={handleAddTask}
                       className="flex-1 bg-primary rounded-lg p-3 items-center"
                     >
-                      <Text className="text-white font-semibold">
+                      <Text className="text-primaryForeground font-semibold">
                         Add Task
                       </Text>
                     </Pressable>

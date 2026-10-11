@@ -23,12 +23,12 @@ interface Milestone {
 }
 
 const GOAL_CATEGORIES = [
-  { name: "Health", icon: "💪", color: "bg-green-500" },
+  { name: "Health", icon: "💪", color: "bg-success" },
   { name: "Career", icon: "💼", color: "bg-blue-500" },
   { name: "Learning", icon: "📚", color: "bg-purple-500" },
-  { name: "Finance", icon: "💰", color: "bg-yellow-500" },
+  { name: "Finance", icon: "💰", color: "bg-warning" },
   { name: "Personal", icon: "🎯", color: "bg-pink-500" },
-  { name: "Relationships", icon: "❤️", color: "bg-red-500" },
+  { name: "Relationships", icon: "❤️", color: "bg-error" },
 ];
 
 export default function GoalTrackingScreen() {
@@ -179,7 +179,7 @@ export default function GoalTrackingScreen() {
           onPress={() => updateProgress(goal.id, goal.progress + 10)}
           className="flex-1 bg-primary rounded-lg p-2 items-center"
         >
-          <Text className="text-white font-semibold">+10%</Text>
+          <Text className="text-primaryForeground font-semibold">+10%</Text>
         </Pressable>
       </View>
 
@@ -198,7 +198,7 @@ export default function GoalTrackingScreen() {
                   milestone.completed ? "bg-primary border-primary" : "border-border"
                 }`}
               >
-                {milestone.completed && <Text className="text-white text-xs">✓</Text>}
+                {milestone.completed && <Text className="text-primaryForeground text-xs">✓</Text>}
               </View>
               <Text
                 className={`text-sm ${
@@ -251,7 +251,7 @@ export default function GoalTrackingScreen() {
           ]}
           className="bg-primary rounded-lg p-4 items-center justify-center"
         >
-          <Text className="text-white font-semibold text-lg">+ Add Goal</Text>
+          <Text className="text-primaryForeground font-semibold text-lg">+ Add Goal</Text>
         </Pressable>
       </View>
 
@@ -337,7 +337,7 @@ export default function GoalTrackingScreen() {
                 disabled={!newGoal.title.trim()}
                 className="flex-1 bg-primary rounded-lg p-3 items-center"
               >
-                <Text className="text-white font-semibold">Create Goal</Text>
+                <Text className="text-primaryForeground font-semibold">Create Goal</Text>
               </Pressable>
             </View>
           </View>

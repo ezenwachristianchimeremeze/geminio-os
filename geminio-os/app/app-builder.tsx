@@ -290,7 +290,7 @@ export default function AppBuilderScreen() {
             style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
             className="flex-1 bg-primary rounded-lg py-2 items-center"
           >
-            <Text className="text-white font-semibold text-sm">Generate Code</Text>
+            <Text className="text-primaryForeground font-semibold text-sm">Generate Code</Text>
           </Pressable>
           <Pressable
             onPress={() => handleExportApp(app.id)}
@@ -305,7 +305,7 @@ export default function AppBuilderScreen() {
             <Text className="flex-1 text-xs font-semibold capitalize text-foreground">AI task: {buildRunStatus.replaceAll('_', ' ')}</Text>
             {['accepted', 'planning', 'executing', 'waiting_for_approval', 'verifying'].includes(buildRunStatus) ? (
               <Pressable onPress={() => void handleCancelBuild()} style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}>
-                <Text className="text-xs font-bold text-error">{cancelBuildMutation.isPending ? 'Cancelling…' : 'Cancel'}</Text>
+                <Text className="text-xs font-bold text-errorText">{cancelBuildMutation.isPending ? 'Cancelling…' : 'Cancel'}</Text>
               </Pressable>
             ) : null}
           </View>
@@ -453,7 +453,7 @@ export default function AppBuilderScreen() {
                 style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                 className="flex-1 bg-primary rounded-lg py-3 items-center"
               >
-                <Text className="text-white font-semibold">Create</Text>
+                <Text className="text-primaryForeground font-semibold">Create</Text>
               </Pressable>
             </View>
           </View>

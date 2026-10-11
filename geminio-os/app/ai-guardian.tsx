@@ -82,13 +82,13 @@ export default function AIGuardianScreen() {
   const getSeverityTextColor = (severity: string) => {
     switch (severity) {
       case 'critical':
-        return 'text-error';
+        return 'text-errorText';
       case 'high':
-        return 'text-warning';
+        return 'text-warningText';
       case 'medium':
         return 'text-primary';
       default:
-        return 'text-success';
+        return 'text-successText';
     }
   };
 
@@ -121,7 +121,7 @@ export default function AIGuardianScreen() {
             style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
             className="bg-primary rounded-lg py-2 items-center mt-2"
           >
-            <Text className="text-white font-semibold text-sm">Mark as Resolved</Text>
+            <Text className="text-primaryForeground font-semibold text-sm">Mark as Resolved</Text>
           </Pressable>
         )}
       </View>
@@ -144,7 +144,7 @@ export default function AIGuardianScreen() {
           {/* Security Score */}
           <View className="bg-gradient-to-br from-success/10 to-primary/10 rounded-2xl p-6 border border-success/20 gap-3 items-center">
             <View className="w-24 h-24 rounded-full bg-success/20 items-center justify-center">
-              <Text className="text-4xl font-bold text-success">{securityScore}</Text>
+              <Text className="text-4xl font-bold text-successText">{securityScore}</Text>
             </View>
             <View className="items-center gap-1">
               <Text className="text-lg font-bold text-foreground">Security Score</Text>
@@ -159,7 +159,7 @@ export default function AIGuardianScreen() {
               style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
               className="flex-1 bg-primary rounded-lg py-3 items-center"
             >
-              <Text className="text-white font-semibold">Run Scan</Text>
+              <Text className="text-primaryForeground font-semibold">Run Scan</Text>
             </Pressable>
             <Pressable
               style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
@@ -175,7 +175,7 @@ export default function AIGuardianScreen() {
               <View className="flex-row items-center justify-between">
                 <Text className="text-lg font-bold text-foreground">Active Threats</Text>
                 <View className="bg-error/20 rounded-full px-2 py-1">
-                  <Text className="text-xs text-error font-bold">{activeAlerts.length}</Text>
+                  <Text className="text-xs text-errorText font-bold">{activeAlerts.length}</Text>
                 </View>
               </View>
               {activeAlerts.map(alert => (
@@ -190,7 +190,7 @@ export default function AIGuardianScreen() {
               <View className="flex-row items-center justify-between">
                 <Text className="text-lg font-bold text-foreground">Resolved</Text>
                 <View className="bg-success/20 rounded-full px-2 py-1">
-                  <Text className="text-xs text-success font-bold">{resolvedAlerts.length}</Text>
+                  <Text className="text-xs text-successText font-bold">{resolvedAlerts.length}</Text>
                 </View>
               </View>
               {resolvedAlerts.map(alert => (
@@ -209,7 +209,7 @@ export default function AIGuardianScreen() {
                   <Text className="font-semibold text-foreground">Scam Detection</Text>
                   <Text className="text-xs text-muted">Identifies fraudulent schemes</Text>
                 </View>
-                <Text className="text-success font-bold">✓</Text>
+                <Text className="text-successText font-bold">✓</Text>
               </View>
               <View className="flex-row items-center gap-3">
                 <Text className="text-2xl">🎣</Text>
@@ -217,7 +217,7 @@ export default function AIGuardianScreen() {
                   <Text className="font-semibold text-foreground">Phishing Detection</Text>
                   <Text className="text-xs text-muted">Blocks phishing attempts</Text>
                 </View>
-                <Text className="text-success font-bold">✓</Text>
+                <Text className="text-successText font-bold">✓</Text>
               </View>
               <View className="flex-row items-center gap-3">
                 <Text className="text-2xl">🦠</Text>
@@ -225,7 +225,7 @@ export default function AIGuardianScreen() {
                   <Text className="font-semibold text-foreground">Malware Protection</Text>
                   <Text className="text-xs text-muted">Detects malicious files</Text>
                 </View>
-                <Text className="text-success font-bold">✓</Text>
+                <Text className="text-successText font-bold">✓</Text>
               </View>
               <View className="flex-row items-center gap-3">
                 <Text className="text-2xl">🔐</Text>
@@ -233,7 +233,7 @@ export default function AIGuardianScreen() {
                   <Text className="font-semibold text-foreground">Encryption</Text>
                   <Text className="text-xs text-muted">AES-256 data protection</Text>
                 </View>
-                <Text className="text-success font-bold">✓</Text>
+                <Text className="text-successText font-bold">✓</Text>
               </View>
               <View className="flex-row items-center gap-3">
                 <Text className="text-2xl">📋</Text>
@@ -241,7 +241,7 @@ export default function AIGuardianScreen() {
                   <Text className="font-semibold text-foreground">Audit Logging</Text>
                   <Text className="text-xs text-muted">Track all activities</Text>
                 </View>
-                <Text className="text-success font-bold">✓</Text>
+                <Text className="text-successText font-bold">✓</Text>
               </View>
             </View>
           </View>

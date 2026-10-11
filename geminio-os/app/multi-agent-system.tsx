@@ -153,10 +153,10 @@ export default function MultiAgentSystemScreen() {
         </View>
         <View
           className={`px-2 py-1 rounded-full ${
-            agent.status === "ready" ? "bg-green-500/20" : "bg-yellow-500/20"
+            agent.status === "ready" ? "bg-success/20" : "bg-warning/20"
           }`}
         >
-          <Text className="text-xs text-green-600">Ready</Text>
+          <Text className="text-xs text-successText">Ready</Text>
         </View>
       </View>
     </Pressable>
@@ -211,7 +211,7 @@ export default function MultiAgentSystemScreen() {
               {isProcessing ? (
                 <ActivityIndicator color="white" />
               ) : (
-                <Text className="text-white font-semibold">Assign Task</Text>
+                <Text className="text-primaryForeground font-semibold">Assign Task</Text>
               )}
             </Pressable>
           </View>
@@ -268,7 +268,7 @@ export default function MultiAgentSystemScreen() {
                 }}
                 className="flex-1 bg-primary rounded-lg p-3 items-center"
               >
-                <Text className="text-white font-semibold">New Task</Text>
+                <Text className="text-primaryForeground font-semibold">New Task</Text>
               </Pressable>
             </View>
           </View>

@@ -74,3 +74,17 @@ export class UnavailableExternalRunner extends ControlPlaneProjectRunner {}
 export function createProjectRunner(_engine: LiveBuilderRuntimeStartInput["engine"]): IsolatedProjectRunner {
   return new ControlPlaneProjectRunner();
 }
+
+/**
+ * Start a runner without ever leaving the caller hanging or the session "starting" forever: a provider that throws
+ * (network error, adapter bug) is reported as a failed start with an honest message, exactly like an unavailable one.
+ */
+export async function startRunnerSafely(runner: IsolatedProjectRunner, input: LiveBuilderRuntimeStartInput): Promise<RunnerResult> {
+  try {
+    return await runner.start(input);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : "unknown error";
+    const message = `The runner failed to start (${detail.slice(0, 300)}). No project source was executed and the persisted project remains unchanged.`;
+    return { status: "failed", isolation: "unavailable", outputMode: "unavailable", url: null, message, diagnostics: [unavailableDiagnostic(message, "RUNNER_START_FAILED")] };
+  }
+}

@@ -193,6 +193,7 @@ export const orchestrationStatusSchema = z.enum([
   "planning",
   "executing",
   "waiting_for_approval",
+  "paused",
   "verifying",
   "completed",
   "failed",
@@ -263,7 +264,9 @@ export const taskEventTypeSchema = z.enum([
   "approval_requested",
   "checkpoint_saved",
   "retry_scheduled",
+  "paused",
   "step_completed",
+  "step_failed",
   "verification_started",
   "verification_completed",
   "completed",
@@ -363,6 +366,8 @@ export const liveBuilderFilePatchSchema = z.object({
   kind: liveBuilderFileKindSchema,
   content: z.string().max(250_000).nullable(),
   summary: z.string().min(1).max(1_000),
+  /** sha256 of the file content this patch was proposed against (null/absent for "add"). Checked at apply time. */
+  baseHash: z.string().length(64).nullable().optional(),
 });
 export type LiveBuilderFilePatch = z.infer<typeof liveBuilderFilePatchSchema>;
 

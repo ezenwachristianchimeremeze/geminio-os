@@ -109,7 +109,7 @@ export default function AdminDashboardScreen() {
             user.status === 'active' ? 'bg-success/20' : 'bg-error/20'
           }`}>
             <Text className={`text-xs font-semibold ${
-              user.status === 'active' ? 'text-success' : 'text-error'
+              user.status === 'active' ? 'text-successText' : 'text-errorText'
             }`}>
               {user.status}
             </Text>
@@ -131,7 +131,7 @@ export default function AdminDashboardScreen() {
                 style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                 className="bg-error/20 rounded px-2 py-1"
               >
-                <Text className="text-error font-semibold text-xs">Suspend</Text>
+                <Text className="text-errorText font-semibold text-xs">Suspend</Text>
               </Pressable>
             )}
           </View>
@@ -146,7 +146,7 @@ export default function AdminDashboardScreen() {
         log.status === 'success' ? 'bg-success/20' : log.status === 'warning' ? 'bg-warning/20' : 'bg-error/20'
       }`}>
         <Text className={`font-bold ${
-          log.status === 'success' ? 'text-success' : log.status === 'warning' ? 'text-warning' : 'text-error'
+          log.status === 'success' ? 'text-successText' : log.status === 'warning' ? 'text-warningText' : 'text-errorText'
         }`}>
           {log.status === 'success' ? '✓' : '!'}
         </Text>
@@ -193,11 +193,11 @@ export default function AdminDashboardScreen() {
                   </View>
                   <View className="bg-success/10 rounded-2xl p-4 border border-success/20">
                     <Text className="text-sm text-muted mb-1">Active Users</Text>
-                    <Text className="text-3xl font-bold text-success">{activeUsers}</Text>
+                    <Text className="text-3xl font-bold text-successText">{activeUsers}</Text>
                   </View>
                   <View className="bg-accent/10 rounded-2xl p-4 border border-accent/20">
                     <Text className="text-sm text-muted mb-1">Creators</Text>
-                    <Text className="text-3xl font-bold text-accent">{creatorCount}</Text>
+                    <Text className="text-3xl font-bold text-accentText">{creatorCount}</Text>
                   </View>
                 </View>
 
@@ -207,15 +207,15 @@ export default function AdminDashboardScreen() {
                   <View className="gap-2">
                     <View className="flex-row items-center justify-between">
                       <Text className="text-sm text-muted">Server Status</Text>
-                      <Text className="text-success font-bold">✓ Healthy</Text>
+                      <Text className="text-successText font-bold">✓ Healthy</Text>
                     </View>
                     <View className="flex-row items-center justify-between">
                       <Text className="text-sm text-muted">Database</Text>
-                      <Text className="text-success font-bold">✓ Connected</Text>
+                      <Text className="text-successText font-bold">✓ Connected</Text>
                     </View>
                     <View className="flex-row items-center justify-between">
                       <Text className="text-sm text-muted">API</Text>
-                      <Text className="text-success font-bold">✓ Running</Text>
+                      <Text className="text-successText font-bold">✓ Running</Text>
                     </View>
                   </View>
                 </View>
@@ -239,7 +239,7 @@ export default function AdminDashboardScreen() {
                       style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                       className="bg-primary rounded-lg px-3 py-1"
                     >
-                      <Text className="text-white font-semibold text-sm">Export</Text>
+                      <Text className="text-primaryForeground font-semibold text-sm">Export</Text>
                     </Pressable>
                   </View>
                   {auditLogs.map(log => (

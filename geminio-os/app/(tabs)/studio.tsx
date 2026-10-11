@@ -38,14 +38,14 @@ const STUDIO_CATEGORIES: StudioCategory[] = [
     title: "Video Script",
     description: "Write scripts for your videos",
     icon: "🎬",
-    color: "bg-red-500",
+    color: "bg-error",
   },
   {
     id: "email",
     title: "Email Campaign",
     description: "Craft compelling email content",
     icon: "✉️",
-    color: "bg-green-500",
+    color: "bg-success",
   },
   {
     id: "presentation",
@@ -123,13 +123,13 @@ export default function StudioScreen() {
                 transform: [{ scale: pressed ? 0.97 : 1 }],
               },
             ]}
-            className="bg-gradient-to-r from-primary to-accent rounded-2xl p-4 flex-row items-center justify-between"
+            className="bg-primary rounded-2xl p-4 flex-row items-center justify-between"
           >
             <View className="gap-1">
-              <Text className="text-white font-bold text-lg">
+              <Text className="text-primaryForeground font-bold text-lg">
                 Quick Create
               </Text>
-              <Text className="text-white/80 text-sm">
+              <Text className="text-primaryForeground text-sm">
                 Start with a template
               </Text>
             </View>

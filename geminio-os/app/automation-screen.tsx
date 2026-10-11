@@ -130,7 +130,7 @@ export default function AutomationScreen() {
             ]}
             className="bg-primary rounded-2xl p-4 items-center mt-4"
           >
-            <Text className="text-white font-semibold">
+            <Text className="text-primaryForeground font-semibold">
               + Create New Automation
             </Text>
           </Pressable>

@@ -1,4 +1,5 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, boolean as mysqlBoolean, json, uniqueIndex, foreignKey } from "drizzle-orm/mysql-core";
+import { sql } from "drizzle-orm";
+import { bigint, int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, boolean as mysqlBoolean, json, uniqueIndex, foreignKey, index, primaryKey } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -95,8 +96,21 @@ export const messages = mysqlTable("messages", {
   content: text("content").notNull(),
   role: mysqlEnum("role", ["user", "assistant"]).notNull(),
   conversationId: varchar("conversationId", { length: 64 }),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+  runId: varchar("runId", { length: 64 }),
+  feedback: mysqlEnum("feedback", ["up", "down"]),
+  feedbackNote: varchar("feedbackNote", { length: 500 }),
+  status: mysqlEnum("status", ["complete", "stopped", "failed"]).default("complete").notNull(),
+  sources: json("sources"),
+  attachments: json("attachments"),
+  editedAt: timestamp("editedAt"),
+  // Response variants: regenerating keeps the old answer (active=false) and links alternates to the user message they answer.
+  active: mysqlBoolean("active").default(true).notNull(),
+  variantOf: varchar("variantOf", { length: 64 }),
+  // Millisecond precision: message order within a conversation is by createdAt, and user/assistant messages can land in the same second.
+  createdAt: timestamp("createdAt", { fsp: 3 }).default(sql`CURRENT_TIMESTAMP(3)`).notNull(),
+}, (table) => ({
+  conversationIdx: index("messages_conversation_idx").on(table.conversationId, table.createdAt),
+}));
 
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = typeof messages.$inferInsert;
@@ -300,9 +314,18 @@ export const conversations = mysqlTable("conversations", {
   summary: text("summary"),
   context: json("context"),
   status: mysqlEnum("status", ["active", "archived"]).default("active").notNull(),
+  pinned: mysqlBoolean("pinned").default(false).notNull(),
+  // Temporary chats are hidden from history/search and swept by retention (see server/home-chat/retention.ts).
+  temporary: mysqlBoolean("temporary").default(false).notNull(),
+  // Read-only share link token; null = not shared. Revocable.
+  shareToken: varchar("shareToken", { length: 64 }),
+  sharedAt: timestamp("sharedAt"),
+  lastMessageAt: timestamp("lastMessageAt").defaultNow().notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  shareTokenUnique: uniqueIndex("conversations_share_token_unique").on(table.shareToken),
+}));
 export type ConversationRecord = typeof conversations.$inferSelect;
 export type InsertConversationRecord = typeof conversations.$inferInsert;
 
@@ -318,9 +341,11 @@ export const orchestrationRuns = mysqlTable("orchestrationRuns", {
   intent: varchar("intent", { length: 120 }),
   capability: varchar("capability", { length: 120 }),
   plan: json("plan"),
-  status: mysqlEnum("status", ["accepted", "planning", "executing", "waiting_for_approval", "verifying", "completed", "failed", "cancelled"]).default("accepted").notNull(),
+  status: mysqlEnum("status", ["accepted", "planning", "executing", "waiting_for_approval", "paused", "verifying", "completed", "failed", "cancelled"]).default("accepted").notNull(),
   result: json("result"),
   error: json("error"),
+  /** Fencing token: incremented by every worker claim; a worker's writes must match the value it was given (see server/ai-core/run-guard.ts). */
+  fence: int("fence").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => ({
@@ -643,3 +668,154 @@ export const liveBuilderRuntimeCheckpoints = mysqlTable("liveBuilderRuntimeCheck
 });
 export type LiveBuilderRuntimeCheckpointRecord = typeof liveBuilderRuntimeCheckpoints.$inferSelect;
 export type InsertLiveBuilderRuntimeCheckpointRecord = typeof liveBuilderRuntimeCheckpoints.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// AI Builder durable state (replaces process-local Maps in lib/ai-builder).
+// NOTE: migration SQL for these tables is staged in drizzle/pending/ and MUST be
+// regenerated with `drizzle-kit generate` (which also writes the snapshot).
+// ---------------------------------------------------------------------------
+export const aiBuilderProjects = mysqlTable("aiBuilderProjects", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  workspaceId: varchar("workspaceId", { length: 64 }).notNull().references(() => liveBuilderWorkspaces.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  prompt: text("prompt").notNull(),
+  stage: mysqlEnum("stage", ["prompt", "requirements", "plan", "code", "preview", "edit", "test", "debug", "rebuild", "validate", "deploy"]).default("prompt").notNull(),
+  status: mysqlEnum("status", ["idle", "running", "waiting_for_user", "failed", "completed", "cancelled"]).default("idle").notNull(),
+  requirements: json("requirements"),
+  plan: json("plan"),
+  memory: json("memory"),
+  lastError: text("lastError"),
+  // Optimistic concurrency token: every state change is `UPDATE ... WHERE version = ?`.
+  version: int("version").default(1).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  builderWorkspaceUnique: uniqueIndex("ai_builder_project_workspace_unique").on(table.workspaceId),
+}));
+export type AiBuilderProjectRecord = typeof aiBuilderProjects.$inferSelect;
+export type InsertAiBuilderProjectRecord = typeof aiBuilderProjects.$inferInsert;
+
+export const aiBuilderEvents = mysqlTable("aiBuilderEvents", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  builderProjectId: varchar("builderProjectId", { length: 64 }).notNull().references(() => aiBuilderProjects.id, { onDelete: "cascade" }),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  sequence: int("sequence").notNull(),
+  type: varchar("type", { length: 64 }).notNull(),
+  payload: json("payload"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  builderEventSequenceUnique: uniqueIndex("ai_builder_event_sequence_unique").on(table.builderProjectId, table.sequence),
+}));
+export type AiBuilderEventRecord = typeof aiBuilderEvents.$inferSelect;
+
+
+// Server-authoritative credit accounting (see server/credits/ledger.ts). Amounts are integer micro-credits (1 credit = 1,000,000).
+export const creditAccounts = mysqlTable("creditAccounts", {
+  userId: int("userId").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  balance: bigint("balance", { mode: "number" }).notNull().default(0),
+  reserved: bigint("reserved", { mode: "number" }).notNull().default(0),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export const creditReservations = mysqlTable("creditReservations", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  requestId: varchar("requestId", { length: 64 }).notNull(),
+  capability: varchar("capability", { length: 100 }).notNull(),
+  amount: bigint("amount", { mode: "number" }).notNull(),
+  charged: bigint("charged", { mode: "number" }).notNull().default(0),
+  status: mysqlEnum("status", ["reserved", "finalized", "released"]).notNull().default("reserved"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  requestUnique: uniqueIndex("credit_reservation_request_unique").on(table.userId, table.requestId),
+}));
+
+// Files attached to Home chat messages. Bytes live in object storage; this row is the ownership + validation record.
+export const homeChatAttachments = mysqlTable("homeChatAttachments", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  conversationId: varchar("conversationId", { length: 64 }),
+  name: varchar("name", { length: 120 }).notNull(),
+  kind: mysqlEnum("kind", ["image", "pdf", "text", "code", "other"]).notNull(),
+  mimeType: varchar("mimeType", { length: 100 }).notNull(),
+  sizeBytes: int("sizeBytes").notNull(),
+  storageKey: varchar("storageKey", { length: 255 }).notNull(),
+  sha256: varchar("sha256", { length: 64 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({ userIdx: index("home_chat_attachments_user_idx").on(table.userId, table.createdAt) }));
+
+export const homeChatPreferences = mysqlTable("homeChatPreferences", {
+  userId: int("userId").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  customInstructions: text("customInstructions").notNull(),
+  responseStyle: mysqlEnum("responseStyle", ["concise", "balanced", "detailed"]).default("balanced").notNull(),
+  language: varchar("language", { length: 16 }),
+  aiLevel: varchar("aiLevel", { length: 32 }).default("standard").notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+// Durable schedules (reminders and recurring prompts) fired by the server worker. See server/home-chat/schedule.ts.
+export const homeChatSchedules = mysqlTable("homeChatSchedules", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  kind: mysqlEnum("kind", ["reminder", "prompt"]).notNull(),
+  title: varchar("title", { length: 120 }).notNull(),
+  prompt: text("prompt"),
+  recurrence: json("recurrence").notNull(),
+  timezone: varchar("timezone", { length: 64 }).notNull(),
+  timeOfDay: varchar("timeOfDay", { length: 5 }).notNull(),
+  nextRunAt: timestamp("nextRunAt"),
+  lastRunAt: timestamp("lastRunAt"),
+  status: mysqlEnum("status", ["active", "paused", "completed"]).default("active").notNull(),
+  failures: int("failures").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({ dueIdx: index("home_chat_schedules_due_idx").on(table.status, table.nextRunAt), userIdx: index("home_chat_schedules_user_idx").on(table.userId) }));
+
+// Execute-once AI operations (legacy direct-LLM procedures). Unique per (userId, key); result persisted for retrieval without re-execution.
+export const aiOperations = mysqlTable("aiOperations", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  key: varchar("key", { length: 64 }).notNull(),
+  capability: varchar("capability", { length: 100 }).notNull(),
+  inputHash: varchar("inputHash", { length: 64 }).notNull(),
+  status: mysqlEnum("status", ["running", "completed", "failed"]).notNull(),
+  attempt: int("attempt").default(1).notNull(),
+  result: json("result"),
+  error: varchar("error", { length: 300 }),
+  leaseUntil: timestamp("leaseUntil", { fsp: 3 }).notNull(),
+  createdAt: timestamp("createdAt", { fsp: 3 }).notNull(),
+  updatedAt: timestamp("updatedAt", { fsp: 3 }).notNull(),
+}, (table) => ({ keyUnique: uniqueIndex("ai_operations_user_key_unique").on(table.userId, table.key) }));
+
+// Approval-gated Home actions (see server/home-chat/actions.ts). Card text is server-generated; transitions are compare-and-set.
+export const homeChatActions = mysqlTable("homeChatActions", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: varchar("type", { length: 40 }).notNull(),
+  resourceId: varchar("resourceId", { length: 64 }).notNull(),
+  resourceLabel: varchar("resourceLabel", { length: 120 }).notNull(),
+  summary: varchar("summary", { length: 300 }).notNull(),
+  consequences: json("consequences").notNull(),
+  estimatedCredits: int("estimatedCredits").default(0).notNull(),
+  reversible: mysqlBoolean("reversible").default(false).notNull(),
+  reversalNote: varchar("reversalNote", { length: 300 }).notNull(),
+  status: mysqlEnum("status", ["pending", "approved", "rejected", "cancelled", "expired", "executing", "executed", "failed"]).default("pending").notNull(),
+  params: json("params").notNull(),
+  result: json("result"),
+  error: varchar("error", { length: 300 }),
+  expiresAt: timestamp("expiresAt", { fsp: 3 }).notNull(),
+  createdAt: timestamp("createdAt", { fsp: 3 }).notNull(),
+  updatedAt: timestamp("updatedAt", { fsp: 3 }).notNull(),
+}, (table) => ({ userIdx: index("home_chat_actions_user_idx").on(table.userId, table.status) }));
+
+// One execution record per (schedule, occurrence): lease + attempts make scheduled runs recoverable after a crash.
+export const homeChatScheduleRuns = mysqlTable("homeChatScheduleRuns", {
+  scheduleId: varchar("scheduleId", { length: 64 }).notNull(),
+  occurrence: timestamp("occurrence", { fsp: 3 }).notNull(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  status: mysqlEnum("status", ["firing", "retry", "done", "failed", "skipped"]).notNull(),
+  attempts: int("attempts").default(1).notNull(),
+  leaseUntil: timestamp("leaseUntil", { fsp: 3 }).notNull(),
+  lastError: varchar("lastError", { length: 300 }),
+  updatedAt: timestamp("updatedAt", { fsp: 3 }).defaultNow().notNull(),
+}, (table) => ({ pk: primaryKey({ columns: [table.scheduleId, table.occurrence] }), leaseIdx: index("home_chat_schedule_runs_lease_idx").on(table.status, table.leaseUntil) }));

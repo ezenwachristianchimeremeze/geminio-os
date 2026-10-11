@@ -109,7 +109,7 @@ export default function WalletAnalyticsScreen() {
         <Text className="font-semibold text-foreground">{transaction.category}</Text>
         <Text className="text-xs text-muted">{transaction.description}</Text>
       </View>
-      <Text className={`font-bold text-lg ${transaction.type === 'income' ? 'text-success' : 'text-foreground'}`}>
+      <Text className={`font-bold text-lg ${transaction.type === 'income' ? 'text-successText' : 'text-foreground'}`}>
         {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)}
       </Text>
     </View>
@@ -123,7 +123,7 @@ export default function WalletAnalyticsScreen() {
       <View className="bg-surface rounded-lg p-3 mb-2 border border-border gap-2">
         <View className="flex-row items-center justify-between">
           <Text className="font-semibold text-foreground">{budget.category}</Text>
-          <Text className={`font-bold ${isOver ? 'text-error' : 'text-success'}`}>
+          <Text className={`font-bold ${isOver ? 'text-errorText' : 'text-successText'}`}>
             ${budget.spent.toFixed(2)} / ${budget.limit.toFixed(2)}
           </Text>
         </View>
@@ -182,15 +182,15 @@ export default function WalletAnalyticsScreen() {
                 <View className="gap-2">
                   <View className="bg-gradient-to-br from-success/10 to-primary/10 rounded-2xl p-4 border border-success/20">
                     <Text className="text-sm text-muted mb-1">Income</Text>
-                    <Text className="text-3xl font-bold text-success">${totalIncome.toFixed(2)}</Text>
+                    <Text className="text-3xl font-bold text-successText">${totalIncome.toFixed(2)}</Text>
                   </View>
                   <View className="bg-gradient-to-br from-error/10 to-warning/10 rounded-2xl p-4 border border-error/20">
                     <Text className="text-sm text-muted mb-1">Expenses</Text>
-                    <Text className="text-3xl font-bold text-error">${totalExpense.toFixed(2)}</Text>
+                    <Text className="text-3xl font-bold text-errorText">${totalExpense.toFixed(2)}</Text>
                   </View>
                   <View className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-2xl p-4 border border-primary/20">
                     <Text className="text-sm text-muted mb-1">Balance</Text>
-                    <Text className={`text-3xl font-bold ${balance >= 0 ? 'text-success' : 'text-error'}`}>
+                    <Text className={`text-3xl font-bold ${balance >= 0 ? 'text-successText' : 'text-errorText'}`}>
                       ${balance.toFixed(2)}
                     </Text>
                   </View>
@@ -205,7 +205,7 @@ export default function WalletAnalyticsScreen() {
                       style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                       className="bg-primary rounded-lg px-3 py-1"
                     >
-                      <Text className="text-white font-semibold text-sm">+ Add</Text>
+                      <Text className="text-primaryForeground font-semibold text-sm">+ Add</Text>
                     </Pressable>
                   </View>
                   {transactions.map(t => (
@@ -224,7 +224,7 @@ export default function WalletAnalyticsScreen() {
                       style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                       className="bg-primary rounded-lg px-3 py-1"
                     >
-                      <Text className="text-white font-semibold text-sm">Report</Text>
+                      <Text className="text-primaryForeground font-semibold text-sm">Report</Text>
                     </Pressable>
                   </View>
                   {budgets.map(budget => (

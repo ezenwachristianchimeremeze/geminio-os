@@ -114,7 +114,7 @@ export default function GlobalSearchScreen() {
               <Text className="font-semibold text-foreground">Filters</Text>
               {Object.keys(filters).length > 0 && (
                 <View className="bg-primary px-2 py-1 rounded-full">
-                  <Text className="text-xs text-white font-semibold">{Object.keys(filters).length}</Text>
+                  <Text className="text-xs text-primaryForeground font-semibold">{Object.keys(filters).length}</Text>
                 </View>
               )}
             </View>
@@ -181,9 +181,9 @@ export default function GlobalSearchScreen() {
             {Object.keys(filters).length > 0 && (
               <Pressable
                 onPress={clearFilters}
-                className="bg-red-500/10 border border-red-500/30 rounded-lg p-2 items-center"
+                className="bg-error/10 border border-error/30 rounded-lg p-2 items-center"
               >
-                <Text className="text-red-600 text-sm font-semibold">Clear All Filters</Text>
+                <Text className="text-errorText text-sm font-semibold">Clear All Filters</Text>
               </Pressable>
             )}
           </View>

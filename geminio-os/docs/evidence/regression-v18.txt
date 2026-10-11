@@ -1,0 +1,236 @@
+== tests/ai-builder.pure.test.ts
+# tests 10
+# pass 10
+# fail 0
+== tests/ai-core-multistep.test.ts
+# tests 18
+# pass 18
+# fail 0
+== tests/ai-core-notify-policy.test.ts
+# tests 3
+# pass 3
+# fail 0
+== tests/ai-core-redact.test.ts
+# tests 3
+# pass 3
+# fail 0
+== tests/ai-core-run-guard.db.test.ts
+# tests 15
+# pass 15
+# fail 0
+== tests/ai-core-run-guard.test.ts
+# tests 8
+# pass 8
+# fail 0
+== tests/ai-core-sse.test.ts
+# tests 10
+# pass 10
+# fail 0
+== tests/ai-core.contracts.test.ts
+# Error: Cannot find module 'drizzle-orm'
+# tests 1
+# pass 0
+# fail 1
+== tests/android-build-config.test.ts
+# tests 4
+# pass 4
+# fail 0
+== tests/auth.logout.test.ts
+# Error: Cannot find module '@trpc/server'
+# tests 1
+# pass 0
+# fail 1
+== tests/backend-capabilities.test.ts
+# tests 4
+# pass 4
+# fail 0
+== tests/builders.test.ts
+# tests 27
+# pass 27
+# fail 0
+== tests/capability-data.test.ts
+# tests 4
+# pass 4
+# fail 0
+== tests/comprehensive.test.ts
+# tests 31
+# pass 31
+# fail 0
+== tests/credits-ledger.test.ts
+# tests 16
+# pass 16
+# fail 0
+== tests/credits-metered-llm.test.ts
+# tests 5
+# pass 5
+# fail 0
+== tests/credits-metering.test.ts
+# tests 9
+# pass 9
+# fail 0
+== tests/credits-operations.test.ts
+# tests 12
+# pass 12
+# fail 0
+== tests/credits-task-lifecycle.test.ts
+# tests 7
+# pass 7
+# fail 0
+== tests/cron-principal.test.ts
+# tests 5
+# pass 5
+# fail 0
+== tests/data-connector-contracts.test.ts
+# tests 2
+# pass 2
+# fail 0
+== tests/design-tokens.test.ts
+# tests 207
+# pass 207
+# fail 0
+== tests/dev-preview.test.ts
+# tests 21
+# pass 21
+# fail 0
+== tests/features.test.ts
+# tests 31
+# pass 31
+# fail 0
+== tests/geminio-contracts.test.ts
+# tests 7
+# pass 7
+# fail 0
+== tests/health.test.ts
+# tests 6
+# pass 6
+# fail 0
+== tests/home-chat-actions.test.ts
+# tests 9
+# pass 9
+# fail 0
+== tests/home-chat-attachments.test.ts
+# tests 10
+# pass 10
+# fail 0
+== tests/home-chat-client-logic.test.ts
+# tests 24
+# pass 24
+# fail 0
+== tests/home-chat-code-run.test.ts
+# tests 8
+# pass 8
+# fail 0
+== tests/home-chat-context.test.ts
+# tests 6
+# pass 6
+# fail 0
+== tests/home-chat-conversations.test.ts
+# tests 25
+# pass 25
+# fail 0
+== tests/home-chat-files.test.ts
+# tests 5
+# pass 5
+# fail 0
+== tests/home-chat-office.test.ts
+# tests 12
+# pass 12
+# fail 0
+== tests/home-chat-pipeline.test.ts
+# tests 45
+# pass 45
+# fail 0
+== tests/home-chat-preferences.test.ts
+# tests 3
+# pass 3
+# fail 0
+== tests/home-chat-schedule.test.ts
+# tests 21
+# pass 21
+# fail 0
+== tests/home-chat-stt.test.ts
+# tests 10
+# pass 10
+# fail 0
+== tests/home-chat.pure.test.ts
+# tests 20
+# pass 20
+# fail 0
+== tests/integration-home-chat.e2e.test.ts
+# tests 6
+# pass 6
+# fail 0
+== tests/integration.test.ts
+# tests 22
+# pass 22
+# fail 0
+== tests/live-builder-ai-edit.test.ts
+# tests 20
+# pass 20
+# fail 0
+== tests/live-builder-atomic-apply.test.ts
+# tests 60
+# pass 60
+# fail 0
+== tests/live-builder.e2e.test.ts
+# Error: Cannot find module '@trpc/server'
+# tests 1
+# pass 0
+# fail 1
+== tests/migration-pending.test.ts
+# tests 7
+# pass 7
+# fail 0
+== tests/mobile-capabilities.test.ts
+# tests 5
+# pass 5
+# fail 0
+== tests/network-adapters.integration.test.ts
+# tests 9
+# pass 9
+# fail 0
+== tests/no-refetchable-ai.test.ts
+# tests 7
+# pass 7
+# fail 0
+== tests/performance.test.ts
+# Error: Cannot find module 'expo-font'
+# tests 1
+# pass 0
+# fail 1
+== tests/provider-contracts.test.ts
+# tests 2
+# pass 2
+# fail 0
+== tests/provider-registry.test.ts
+# tests 3
+# pass 3
+# fail 0
+== tests/remaining-capability-contracts.test.ts
+# tests 3
+# pass 3
+# fail 0
+== tests/runner-control-plane.test.ts
+# tests 9
+# pass 9
+# fail 0
+== tests/runtime-session-cas.db.test.ts
+# tests 3
+# pass 3
+# fail 0
+== tests/session-cookies.test.ts
+# tests 3
+# pass 3
+# fail 0
+== tests/task-approvals.db.test.ts
+# tests 15
+# pass 15
+# fail 0
+== tests/verification-defects.test.ts
+# tests 31
+# pass 31
+# fail 0
+== tests/verify-safety-guard.test.ts
+# tests 5
+# pass 5
+# fail 0

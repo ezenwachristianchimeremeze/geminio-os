@@ -317,9 +317,7 @@ const fetchWithBackoff = async (url: string, init: FetchInit): Promise<Response>
     : new Error("LLM request failed after exhausting retries");
 };
 
-export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
-  assertApiKey();
-
+function buildLlmPayload(params: InvokeParams): Record<string, unknown> {
   const {
     messages,
     tools,
@@ -376,6 +374,13 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.response_format = normalizedResponseFormat;
   }
 
+  return payload;
+}
+
+export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
+  assertApiKey();
+  const payload = buildLlmPayload(params);
+
   const response = await fetchWithBackoff(resolveApiUrl(), {
     method: "POST",
     headers: {
@@ -391,6 +396,17 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   }
 
   return (await response.json()) as InvokeResult;
+}
+
+/**
+ * Streaming variant: same payload, `stream: true`, text deltas delivered to onText, final aggregated result returned.
+ * The built-in (OpenAI-compatible) endpoint only. Not exercised against the real endpoint in this environment.
+ */
+export async function invokeLLMStream(params: InvokeParams, onText: (delta: string) => void, signal?: AbortSignal): Promise<InvokeResult> {
+  assertApiKey();
+  const { streamChatCompletion } = await import("../ai-core/sse");
+  const r = await streamChatCompletion({ url: resolveApiUrl(), headers: { "content-type": "application/json", authorization: `Bearer ${ENV.forgeApiKey}` }, payload: buildLlmPayload(params), onText, signal });
+  return { id: "stream", created: Math.floor(Date.now() / 1000), model: r.model ?? params.model ?? "unknown", choices: [{ index: 0, message: { role: "assistant", content: r.content }, finish_reason: r.finishReason }], usage: (r.usage as InvokeResult["usage"]) ?? undefined } as InvokeResult;
 }
 
 export type ModelInfo = {

@@ -21,7 +21,7 @@ const OPPORTUNITY_CATEGORIES = [
   { name: "Career", icon: "💼", color: "bg-blue-500" },
   { name: "Business", icon: "🚀", color: "bg-orange-500" },
   { name: "Learning", icon: "📚", color: "bg-purple-500" },
-  { name: "Investment", icon: "💰", color: "bg-green-500" },
+  { name: "Investment", icon: "💰", color: "bg-success" },
   { name: "Networking", icon: "🤝", color: "bg-pink-500" },
 ];
 
@@ -96,16 +96,25 @@ export default function OpportunityFinderScreen() {
     }
   };
 
+  const getPotentialTextColor = (potential: string) => {
+    switch (potential) {
+      case "high": return "text-successForeground";
+      case "medium": return "text-warningForeground";
+      case "low": return "text-errorForeground";
+      default: return "text-background"; // on bg-muted
+    }
+  };
+
   const getPotentialColor = (potential: string) => {
     switch (potential) {
       case "high":
-        return "bg-green-500";
+        return "bg-success";
       case "medium":
-        return "bg-yellow-500";
+        return "bg-warning";
       case "low":
-        return "bg-red-500";
+        return "bg-error";
       default:
-        return "bg-gray-500";
+        return "bg-muted";
     }
   };
 
@@ -125,7 +134,7 @@ export default function OpportunityFinderScreen() {
         <View
           className={`px-2 py-1 rounded-full ${getPotentialColor(opportunity.potential)}`}
         >
-          <Text className="text-white text-xs font-semibold">
+          <Text className={`text-xs font-semibold ${getPotentialTextColor(opportunity.potential)}`}>
             {opportunity.potential.charAt(0).toUpperCase() + opportunity.potential.slice(1)}
           </Text>
         </View>
@@ -172,7 +181,7 @@ export default function OpportunityFinderScreen() {
             ]}
             className="bg-primary rounded-lg px-8 py-4 items-center justify-center"
           >
-            <Text className="text-white font-semibold">
+            <Text className="text-primaryForeground font-semibold">
               {isScanning ? "Scanning..." : "Scan for Opportunities"}
             </Text>
           </Pressable>
@@ -226,7 +235,7 @@ export default function OpportunityFinderScreen() {
                 <View
                   className={`px-3 py-2 rounded-lg items-center ${getPotentialColor(selectedOpportunity?.potential || "")}`}
                 >
-                  <Text className="text-white font-semibold">
+                  <Text className={`font-semibold ${getPotentialTextColor(selectedOpportunity?.potential || "")}`}>
                     {selectedOpportunity?.potential ? selectedOpportunity.potential.charAt(0).toUpperCase() + selectedOpportunity.potential.slice(1) : "Unknown"} Potential
                   </Text>
                 </View>
@@ -265,7 +274,7 @@ export default function OpportunityFinderScreen() {
                 }}
                 className="flex-1 bg-primary rounded-lg p-3 items-center"
               >
-                <Text className="text-white font-semibold">Explore</Text>
+                <Text className="text-primaryForeground font-semibold">Explore</Text>
               </Pressable>
             </View>
           </View>

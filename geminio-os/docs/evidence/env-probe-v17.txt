@@ -1,0 +1,42 @@
+# Environment probe 2026-10-11 (v17). Commands run once; not retried; no workaround attempted.
+
+$ node -v
+v22.22.0
+exit=0
+
+$ pnpm -v
+exit=143
+
+$ curl -sS -o /dev/null -w http=%{http_code} https://registry.npmjs.org/vitest
+curl: (6) Could not resolve host: registry.npmjs.org
+http=000
+exit=0
+
+$ which mysqld mariadbd mysql
+exit=0
+
+$ docker info
+Client: Docker Engine - Community
+ Version:    29.8.2
+ Context:    default
+ Debug Mode: false
+ Plugins:
+  buildx: Docker Buildx (Docker Inc.)
+exit=0
+
+$ ls node_modules
+ls: cannot access 'node_modules': No such file or directory
+exit=0
+
+$ pip download vitest
+WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x7fc266f38ad0>: Failed to establish a new connection: [Errno -2] Name or service not known')': /simple/vitest/
+WARNING: Retrying (Retry(total=3, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x7fc26714a350>: Failed to establish a new connection: [Errno -2] Name or service not known')': /simple/vitest/
+WARNING: Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x7fc26714a5d0>: Failed to establish a new connection: [Errno -2] Name or service not known')': /simple/vitest/
+WARNING: Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x7fc26714a850>: Failed to establish a new connection: [Errno -2] Name or service not known')': /simple/vitest/
+WARNING: Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x7fc26714aad0>: Failed to establish a new connection: [Errno -2] Name or service not known')': /simple/vitest/
+ERROR: Could not find a version that satisfies the requirement vitest (from versions: none)
+exit=0
+
+$ curl -sS $HTTPS_PROXY/__agentproxy/status | grep noProxy
+  "noProxy": "localhost,127.0.0.1,::1,127.0.0.0/8,0.0.0.0/8,::,169.254.0.0/16,api.anthropic.com,api-staging.anthropic.com,api-pr-preview.anthropic.com,mcp-proxy.anthropic.com,mcp-proxy-staging.anthropic.com,registry.npmjs.org,jsr.io,npm.jsr.io,pypi.org,files.pythonhosted.org,index.crates.io,proxy.golang.org,host.docker.internal,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,.svc.cluster.loc
+exit=0

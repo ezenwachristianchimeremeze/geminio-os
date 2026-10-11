@@ -144,7 +144,7 @@ export default function KnowledgeVaultScreen() {
             <Text className="text-xs text-muted mt-1 uppercase">{doc.type.replace('_', ' ')}</Text>
           </View>
           <View className={`px-2 py-1 rounded ${doc.encrypted ? 'bg-success/20' : 'bg-warning/20'}`}>
-            <Text className={`text-xs font-semibold ${doc.encrypted ? 'text-success' : 'text-warning'}`}>
+            <Text className={`text-xs font-semibold ${doc.encrypted ? 'text-successText' : 'text-warningText'}`}>
               {doc.encrypted ? '🔒 Encrypted' : '🔓 Unencrypted'}
             </Text>
           </View>
@@ -209,7 +209,7 @@ export default function KnowledgeVaultScreen() {
                     style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                     className="flex-1 bg-primary rounded-lg py-3 items-center"
                   >
-                    <Text className="text-white font-semibold">+ Add Item</Text>
+                    <Text className="text-primaryForeground font-semibold">+ Add Item</Text>
                   </Pressable>
                   <Pressable
                     onPress={handleViewKnowledgeGraph}
@@ -292,7 +292,7 @@ export default function KnowledgeVaultScreen() {
                         selectedType === type ? 'bg-primary border-primary' : 'bg-surface border-border'
                       }`}
                     >
-                      <Text className={`text-xs font-semibold ${selectedType === type ? 'text-white' : 'text-foreground'}`}>
+                      <Text className={`text-xs font-semibold ${selectedType === type ? 'text-primaryForeground' : 'text-foreground'}`}>
                         {type.charAt(0).toUpperCase() + type.slice(1)}
                       </Text>
                     </Pressable>
@@ -334,7 +334,7 @@ export default function KnowledgeVaultScreen() {
                   style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                   className="flex-1 bg-primary rounded-lg py-3 items-center"
                 >
-                  <Text className="text-white font-semibold">Add</Text>
+                  <Text className="text-primaryForeground font-semibold">Add</Text>
                 </Pressable>
               </View>
             </ScrollView>

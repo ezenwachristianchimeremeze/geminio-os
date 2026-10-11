@@ -11,6 +11,15 @@ export type PreviewGatewaySession = {
   createdAt: string;
 };
 
+export type PreviewOwnershipCheck = {
+  workspaceOwned(userId: number, workspaceId: string): Promise<boolean>;
+  versionInWorkspace(userId: number, workspaceId: string, versionId: string): Promise<boolean>;
+  runtimeInWorkspace(userId: number, workspaceId: string, sessionId: string): Promise<boolean>;
+};
+
+/** Mapped to NOT_FOUND by the router so a caller cannot probe whether another tenant's ids exist. */
+export class PreviewOwnershipError extends Error { constructor(message: string) { super(message); this.name = "PreviewOwnershipError"; } }
+
 export class PreviewGateway {
   private readonly sessions = new Map<string, PreviewGatewaySession>();
 
@@ -28,6 +37,17 @@ export class PreviewGateway {
     };
     this.sessions.set(session.id, session);
     return session;
+  }
+
+  /**
+   * Create a session only for resources the caller owns. `create` trusts its input; this is the entry point for client-supplied ids.
+   * `verify` answers: does the user own the workspace, does the version belong to it, does the runtime session belong to it?
+   */
+  async createVerified(input: { userId: number; workspaceId: string; versionId?: string | null; runtimeSessionId?: string | null; ttlMs?: number }, verify: PreviewOwnershipCheck): Promise<PreviewGatewaySession> {
+    if (!(await verify.workspaceOwned(input.userId, input.workspaceId))) throw new PreviewOwnershipError("Workspace not found.");
+    if (input.versionId && !(await verify.versionInWorkspace(input.userId, input.workspaceId, input.versionId))) throw new PreviewOwnershipError("Version not found in this workspace.");
+    if (input.runtimeSessionId && !(await verify.runtimeInWorkspace(input.userId, input.workspaceId, input.runtimeSessionId))) throw new PreviewOwnershipError("Runtime session not found in this workspace.");
+    return this.create(input);
   }
 
   authorize(userId: number, sessionId: string, now = Date.now()): PreviewGatewaySession {

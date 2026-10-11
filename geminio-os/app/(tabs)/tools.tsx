@@ -180,7 +180,7 @@ export default function ToolsScreen() {
               ]}
               className="bg-primary rounded-lg p-3 items-center mt-2"
             >
-              <Text className="text-white font-semibold">
+              <Text className="text-primaryForeground font-semibold">
                 Launch Agent Team
               </Text>
             </Pressable>

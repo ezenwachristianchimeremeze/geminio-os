@@ -107,10 +107,10 @@ export default function CodeStudioScreen() {
             <Text
               className={`text-xs font-semibold ${
                 template.difficulty === 'beginner'
-                  ? 'text-success'
+                  ? 'text-successText'
                   : template.difficulty === 'intermediate'
-                    ? 'text-warning'
-                    : 'text-error'
+                    ? 'text-warningText'
+                    : 'text-errorText'
               }`}
             >
               {template.difficulty}

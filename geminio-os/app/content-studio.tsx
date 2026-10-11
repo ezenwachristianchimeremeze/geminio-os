@@ -19,8 +19,8 @@ const CONTENT_TYPES = [
   { id: "blog", name: "Blog Post", icon: "📝", color: "bg-blue-500" },
   { id: "social", name: "Social Media", icon: "📱", color: "bg-purple-500" },
   { id: "image", name: "Image", icon: "🖼️", color: "bg-pink-500" },
-  { id: "video", name: "Video Script", icon: "🎬", color: "bg-red-500" },
-  { id: "email", name: "Email", icon: "📧", color: "bg-green-500" },
+  { id: "video", name: "Video Script", icon: "🎬", color: "bg-error" },
+  { id: "email", name: "Email", icon: "📧", color: "bg-success" },
   { id: "presentation", name: "Presentation", icon: "📊", color: "bg-orange-500" },
 ];
 
@@ -138,7 +138,7 @@ export default function ContentStudioScreen() {
               {isGenerating ? (
                 <ActivityIndicator color="white" />
               ) : (
-                <Text className="text-white font-semibold">Generate Content</Text>
+                <Text className="text-primaryForeground font-semibold">Generate Content</Text>
               )}
             </Pressable>
           </View>
@@ -198,7 +198,7 @@ export default function ContentStudioScreen() {
                 }}
                 className="flex-1 bg-primary rounded-lg p-3 items-center"
               >
-                <Text className="text-white font-semibold">Create Another</Text>
+                <Text className="text-primaryForeground font-semibold">Create Another</Text>
               </Pressable>
             </View>
           </View>

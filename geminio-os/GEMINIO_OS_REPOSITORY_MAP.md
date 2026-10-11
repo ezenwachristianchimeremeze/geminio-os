@@ -23,3 +23,13 @@
 4. Professional Live Builder workspace and authenticated workflow.
 5. Sandbox runner control plane and preview session boundaries.
 6. Home capability handoffs, durable Builder dashboard/project creation, and backend notifications.
+
+---
+## Additions from consolidation
+- `lib/ai-builder/` — requirements, UI/backend generators, analyzer, memory, progress.
+- `server/routers/{chat,jobs,features,advisor}.ts` — mounted in `server/routers.ts`.
+- `lib/_core/*` — client-side services from master-latest (advisor, memory, offline-sync, voice, encryption...); unwired.
+- `docs/history/` — earlier crash-fix reports and `superseded/` archived code (not compiled into the app).
+- `CONSOLIDATION_REPORT.md` — merge decisions.
+
+- `server/dev-preview/` — supervisor, progress (matrix parser), activity log, router. `server/_core/health.ts` — readiness. `app/dev-preview.tsx` — panel. `scripts/dev-{activity,progress}.ts` — CLIs. `BLUEPRINT_IMPLEMENTATION_MATRIX.md` — machine-readable source of progress.

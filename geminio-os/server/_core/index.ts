@@ -8,6 +8,9 @@ import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { runAiWorkerOnce } from "../ai-core/orchestrator";
+import { sql } from "drizzle-orm";
+import { getDb } from "../db";
+import { evaluateDatabaseHealth } from "./health";
 
 function isTrustedOrigin(origin: string): boolean {
   const configuredOrigins = (process.env.CORS_ALLOWED_ORIGINS ?? "").split(",").map((value) => value.trim()).filter(Boolean);
@@ -80,6 +83,17 @@ async function startServer() {
     res.json({ ok: true, timestamp: Date.now() });
   });
 
+  // Readiness: process is up AND its dependencies answer. 503 when the database is not usable.
+  app.get("/api/health/ready", async (_req, res) => {
+    const db = await evaluateDatabaseHealth({
+      databaseUrl: process.env.DATABASE_URL,
+      getClient: () => getDb(),
+      ping: (client) => (client as { execute: (q: unknown) => Promise<unknown> }).execute(sql`select 1`),
+      nodeEnv: process.env.NODE_ENV,
+    });
+    res.status(db.ok ? 200 : 503).json({ ok: db.ok, timestamp: Date.now(), db });
+  });
+
   app.use(
     "/api/trpc",
     createExpressMiddleware({
@@ -112,6 +126,31 @@ async function startServer() {
     void runWorkerTick();
     const workerTimer = setInterval(() => { void runWorkerTick(); }, 5000);
     void workerTimer;
+    // Retention: temporary Home chats are actually deleted (rows + messages) once older than the stated retention window.
+    const sweep = async () => {
+      try {
+        const { getMysqlConversationStore } = await import("../home-chat/mysql-store");
+        const { sweepTemporaryConversations } = await import("../home-chat/conversations");
+        const n = await sweepTemporaryConversations(await getMysqlConversationStore());
+        if (n > 0) console.log(`[home-chat] deleted ${n} expired temporary conversation(s)`);
+      } catch (error) { console.error("[home-chat] temporary-chat sweep failed", error instanceof Error ? error.message : error); }
+    };
+    const reconcile = async () => {
+      try {
+        const { reconcileUnsettledReservations } = await import("../credits/mysql-store");
+        const n = await reconcileUnsettledReservations();
+        if (n > 0) console.log(`[credits] reconciled ${n} unsettled reservation(s)`);
+      } catch (error) { console.error("[credits] reconciliation failed", error instanceof Error ? error.message : error); }
+    };
+    setInterval(() => { void reconcile(); }, 60_000);
+    let scheduleTickRunning = false;
+    setInterval(() => {
+      if (scheduleTickRunning) return; scheduleTickRunning = true;
+      void import("../home-chat/service").then((m) => m.runScheduleTick()).then((r) => { if (r.fired || r.failed || r.recovered || r.retried) console.log(`[schedules] fired=${r.fired} recovered=${r.recovered} retried=${r.retried} failed=${r.failed} skipped=${r.skipped}`); }).catch((e) => console.error("[schedules] tick failed", e instanceof Error ? e.message : e)).finally(() => { scheduleTickRunning = false; });
+    }, 30_000);
+    setInterval(() => { void import("../ai-core/orchestrator").then((m) => m.expirePausedRuns()).then((n) => { if (n > 0) console.log(`[ai-core] cancelled ${n} expired paused run(s)`); }).catch((e) => console.error("[ai-core] paused-run expiry failed", e instanceof Error ? e.message : e)); }, 10 * 60_000);
+    setTimeout(() => { void sweep(); }, 30_000);
+    setInterval(() => { void sweep(); }, 60 * 60_000);
   });
 }
 

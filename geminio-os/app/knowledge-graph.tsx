@@ -177,7 +177,7 @@ export default function KnowledgeGraphScreen() {
           ]}
           className="bg-primary rounded-lg p-4 items-center justify-center"
         >
-          <Text className="text-white font-semibold text-lg">+ Add Knowledge Node</Text>
+          <Text className="text-primaryForeground font-semibold text-lg">+ Add Knowledge Node</Text>
         </Pressable>
       </View>
 
@@ -241,7 +241,7 @@ export default function KnowledgeGraphScreen() {
                 disabled={!newNode.title.trim()}
                 className="flex-1 bg-primary rounded-lg p-3 items-center"
               >
-                <Text className="text-white font-semibold">Create</Text>
+                <Text className="text-primaryForeground font-semibold">Create</Text>
               </Pressable>
             </View>
           </View>
@@ -304,9 +304,9 @@ export default function KnowledgeGraphScreen() {
                   if (selectedNode) deleteNode(selectedNode.id);
                   setSelectedNode(null);
                 }}
-                className="flex-1 bg-red-500/10 border border-red-500/30 rounded-lg p-3 items-center"
+                className="flex-1 bg-error/10 border border-error/30 rounded-lg p-3 items-center"
               >
-                <Text className="text-red-600 font-semibold">Delete</Text>
+                <Text className="text-errorText font-semibold">Delete</Text>
               </Pressable>
             </View>
           </View>

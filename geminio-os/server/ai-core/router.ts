@@ -6,6 +6,7 @@ import {
 } from "../../shared/geminio-contracts";
 import { capabilityPromptCatalog, getCapability } from "./capabilities";
 import { normalizeProviderError, resolveProvider } from "./providers";
+import { resolveModel } from "./models";
 
 const intentOutputSchema = {
   name: "geminio_ai_intent",
@@ -40,7 +41,7 @@ function contentToText(content: unknown): string {
   return "";
 }
 
-function deterministicRoute(message: string): AiIntent {
+export function deterministicRoute(message: string): AiIntent {
   const normalized = message.toLowerCase();
   let capability = "conversation.reply";
   let name = "Conversation reply";
@@ -119,7 +120,7 @@ export async function routeIntent(message: string, preferredProvider?: AiProvide
   const provider = resolveProvider(preferredProvider);
   try {
     const response = await provider.invoke({
-      model: "gpt-5-mini",
+      model: resolveModel(process.env, { capability: "router" }),
       maxTokens: 1200,
       messages: [
         {
@@ -147,4 +148,31 @@ export async function routeIntent(message: string, preferredProvider?: AiProvide
     console.warn("AI router fallback", failure);
     return { intent: deterministicRoute(message), provider: provider.provider, fallbackUsed: true };
   }
+}
+
+
+/**
+ * Server-selected routing: the calling server code (never a client) names the capability, so
+ * no provider call is spent classifying and the decision is deterministic and auditable.
+ * `parameters` are persisted in the run plan, so queue retries keep their context.
+ */
+export function forcedRoute(capability: string, parameters: Record<string, unknown>, preferredProvider?: AiProvider): RouteDecision {
+  const registered = getCapability(capability);
+  if (!registered || !registered.descriptor.enabled) throw new Error(`Capability "${capability}" is not available.`);
+  const provider = resolveProvider(preferredProvider);
+  const intent = aiIntentSchema.parse({
+    name: registered.descriptor.displayName,
+    capability,
+    confidence: 1,
+    rationale: "Capability selected by trusted server code.",
+    requiresApproval: registered.descriptor.requiresApproval,
+    risk: registered.descriptor.risk,
+    parameters,
+  });
+  return { intent, provider: provider.provider, fallbackUsed: false };
+}
+
+/** No provider call: the deterministic fallback as a RouteDecision (used when the classification call cannot be paid for). */
+export function deterministicDecision(message: string, preferredProvider?: AiProvider): RouteDecision {
+  return { intent: deterministicRoute(message), provider: resolveProvider(preferredProvider).provider, fallbackUsed: true };
 }

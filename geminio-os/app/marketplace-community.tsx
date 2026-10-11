@@ -137,7 +137,7 @@ export default function MarketplaceCommunityScreen() {
         <Text className="text-sm text-muted">{item.description}</Text>
         <View className="flex-row items-center gap-4 mt-2">
           <View className="flex-row items-center gap-1">
-            <Text className="text-yellow-500">⭐</Text>
+            <Text className="text-warningText">⭐</Text>
             <Text className="text-xs font-semibold text-foreground">{item.rating}</Text>
             <Text className="text-xs text-muted">({item.reviews})</Text>
           </View>
@@ -171,7 +171,7 @@ export default function MarketplaceCommunityScreen() {
           style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
           className="bg-primary rounded-lg py-2 items-center"
         >
-          <Text className="text-white font-semibold">Join Team</Text>
+          <Text className="text-primaryForeground font-semibold">Join Team</Text>
         </Pressable>
       </View>
     </Pressable>
@@ -231,7 +231,7 @@ export default function MarketplaceCommunityScreen() {
                         filterType === type ? 'bg-primary border-primary' : 'bg-surface border-border'
                       }`}
                     >
-                      <Text className={`text-xs font-semibold ${filterType === type ? 'text-white' : 'text-foreground'}`}>
+                      <Text className={`text-xs font-semibold ${filterType === type ? 'text-primaryForeground' : 'text-foreground'}`}>
                         {type.charAt(0).toUpperCase() + type.slice(1)}
                       </Text>
                     </Pressable>
@@ -249,7 +249,7 @@ export default function MarketplaceCommunityScreen() {
                       style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                       className="bg-primary rounded-lg px-3 py-1"
                     >
-                      <Text className="text-white font-semibold text-sm">Publish</Text>
+                      <Text className="text-primaryForeground font-semibold text-sm">Publish</Text>
                     </Pressable>
                   </View>
                   {filteredItems.map(item => (
@@ -272,7 +272,7 @@ export default function MarketplaceCommunityScreen() {
                   style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                   className="bg-primary rounded-lg p-4 items-center"
                 >
-                  <Text className="text-white font-semibold">+ Create New Team</Text>
+                  <Text className="text-primaryForeground font-semibold">+ Create New Team</Text>
                 </Pressable>
               </>
             )}

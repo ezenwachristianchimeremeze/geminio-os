@@ -71,8 +71,8 @@ export default function BusinessScreen() {
       <Text
         className={`text-lg font-bold ${
           transaction.type === 'income'
-            ? 'text-success'
-            : 'text-error'
+            ? 'text-successText'
+            : 'text-errorText'
         }`}
       >
         {transaction.type === 'income' ? '+' : '-'}${transaction.amount}
@@ -107,7 +107,7 @@ export default function BusinessScreen() {
               <Text
                 className={`text-center font-semibold text-sm ${
                   activeTab === 'overview'
-                    ? 'text-white'
+                    ? 'text-primaryForeground'
                     : 'text-foreground'
                 }`}
               >
@@ -125,7 +125,7 @@ export default function BusinessScreen() {
               <Text
                 className={`text-center font-semibold text-sm ${
                   activeTab === 'income'
-                    ? 'text-white'
+                    ? 'text-primaryForeground'
                     : 'text-foreground'
                 }`}
               >
@@ -143,7 +143,7 @@ export default function BusinessScreen() {
               <Text
                 className={`text-center font-semibold text-sm ${
                   activeTab === 'expenses'
-                    ? 'text-white'
+                    ? 'text-primaryForeground'
                     : 'text-foreground'
                 }`}
               >
@@ -159,13 +159,13 @@ export default function BusinessScreen() {
               <View className="gap-3">
                 <View className="bg-success/10 rounded-2xl p-4 border border-success/20">
                   <Text className="text-sm text-muted mb-1">Total Income</Text>
-                  <Text className="text-3xl font-bold text-success">
+                  <Text className="text-3xl font-bold text-successText">
                     ${totalIncome.toLocaleString()}
                   </Text>
                 </View>
                 <View className="bg-error/10 rounded-2xl p-4 border border-error/20">
                   <Text className="text-sm text-muted mb-1">Total Expenses</Text>
-                  <Text className="text-3xl font-bold text-error">
+                  <Text className="text-3xl font-bold text-errorText">
                     ${totalExpense.toLocaleString()}
                   </Text>
                 </View>
@@ -229,7 +229,7 @@ export default function BusinessScreen() {
               ]}
               className="bg-primary rounded-2xl p-4 items-center"
             >
-              <Text className="text-white font-semibold">
+              <Text className="text-primaryForeground font-semibold">
                 + Log Transaction
               </Text>
             </Pressable>

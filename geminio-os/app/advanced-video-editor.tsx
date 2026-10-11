@@ -162,7 +162,7 @@ export default function AdvancedVideoEditorScreen() {
           </Text>
         </View>
         <View className="bg-success/20 rounded px-2 py-1">
-          <Text className="text-xs text-success font-semibold">
+          <Text className="text-xs text-successText font-semibold">
             {Math.round(highlight.score * 100)}%
           </Text>
         </View>
@@ -187,7 +187,7 @@ export default function AdvancedVideoEditorScreen() {
           style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
           className="bg-primary rounded-lg py-2 items-center"
         >
-          <Text className="text-white font-semibold text-sm">Export</Text>
+          <Text className="text-primaryForeground font-semibold text-sm">Export</Text>
         </Pressable>
       </View>
     </View>
@@ -227,11 +227,11 @@ export default function AdvancedVideoEditorScreen() {
               <View className="flex-row items-center gap-3">
                 <Text className="text-2xl">🎬</Text>
                 <View>
-                  <Text className="font-semibold text-white">Scene Detection</Text>
-                  <Text className="text-xs text-white/80">Identify video scenes</Text>
+                  <Text className="font-semibold text-primaryForeground">Scene Detection</Text>
+                  <Text className="text-xs text-primaryForeground">Identify video scenes</Text>
                 </View>
               </View>
-              <Text className="text-white">→</Text>
+              <Text className="text-primaryForeground">→</Text>
             </Pressable>
 
             <Pressable
@@ -242,11 +242,11 @@ export default function AdvancedVideoEditorScreen() {
               <View className="flex-row items-center gap-3">
                 <Text className="text-2xl">⭐</Text>
                 <View>
-                  <Text className="font-semibold text-white">Highlight Detection</Text>
-                  <Text className="text-xs text-white/80">Find best moments</Text>
+                  <Text className="font-semibold text-primaryForeground">Highlight Detection</Text>
+                  <Text className="text-xs text-primaryForeground">Find best moments</Text>
                 </View>
               </View>
-              <Text className="text-white">→</Text>
+              <Text className="text-primaryForeground">→</Text>
             </Pressable>
           </View>
 
@@ -279,7 +279,7 @@ export default function AdvancedVideoEditorScreen() {
                 style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                 className="bg-primary rounded-lg px-3 py-1"
               >
-                <Text className="text-white font-semibold text-sm">+ New</Text>
+                <Text className="text-primaryForeground font-semibold text-sm">+ New</Text>
               </Pressable>
             </View>
             {selectedVideo.clips.length === 0 ? (
@@ -367,7 +367,7 @@ export default function AdvancedVideoEditorScreen() {
                       selectedPlatform === platform.id ? 'bg-primary border-primary' : 'bg-surface border-border'
                     }`}
                   >
-                    <Text className={`text-xs font-semibold ${selectedPlatform === platform.id ? 'text-white' : 'text-foreground'}`}>
+                    <Text className={`text-xs font-semibold ${selectedPlatform === platform.id ? 'text-primaryForeground' : 'text-foreground'}`}>
                       {platform.name}
                     </Text>
                   </Pressable>
@@ -390,7 +390,7 @@ export default function AdvancedVideoEditorScreen() {
                 style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                 className="flex-1 bg-primary rounded-lg py-3 items-center"
               >
-                <Text className="text-white font-semibold">Create</Text>
+                <Text className="text-primaryForeground font-semibold">Create</Text>
               </Pressable>
             </View>
           </View>

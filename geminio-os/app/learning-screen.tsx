@@ -121,16 +121,16 @@ export default function LearningScreen() {
             opacity: pressed ? 0.7 : 1,
           },
         ]}
-        className="bg-gradient-to-br from-primary to-accent rounded-2xl p-6 mb-4 min-h-40 items-center justify-center border border-primary/20"
+        className="bg-primary rounded-2xl p-6 mb-4 min-h-40 items-center justify-center border border-primary/20"
       >
         <View className="items-center gap-2">
-          <Text className="text-white/70 text-sm font-semibold">
+          <Text className="text-primaryForeground text-sm font-semibold">
             {isFlipped ? 'Answer' : 'Question'}
           </Text>
-          <Text className="text-white text-center text-lg font-bold">
+          <Text className="text-primaryForeground text-center text-lg font-bold">
             {isFlipped ? card.answer : card.question}
           </Text>
-          <Text className="text-white/50 text-xs mt-4">
+          <Text className="text-primaryForeground text-xs mt-4">
             Tap to flip
           </Text>
         </View>
@@ -165,7 +165,7 @@ export default function LearningScreen() {
               <Text
                 className={`text-center font-semibold text-sm ${
                   activeTab === 'plans'
-                    ? 'text-white'
+                    ? 'text-primaryForeground'
                     : 'text-foreground'
                 }`}
               >
@@ -183,7 +183,7 @@ export default function LearningScreen() {
               <Text
                 className={`text-center font-semibold text-sm ${
                   activeTab === 'flashcards'
-                    ? 'text-white'
+                    ? 'text-primaryForeground'
                     : 'text-foreground'
                 }`}
               >
@@ -201,7 +201,7 @@ export default function LearningScreen() {
               <Text
                 className={`text-center font-semibold text-sm ${
                   activeTab === 'quizzes'
-                    ? 'text-white'
+                    ? 'text-primaryForeground'
                     : 'text-foreground'
                 }`}
               >
@@ -256,7 +256,7 @@ export default function LearningScreen() {
                 ]}
                 className="bg-primary rounded-lg px-6 py-3 mt-2"
               >
-                <Text className="text-white font-semibold">
+                <Text className="text-primaryForeground font-semibold">
                   Create Quiz
                 </Text>
               </Pressable>

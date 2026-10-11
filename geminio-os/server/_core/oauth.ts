@@ -1,3 +1,4 @@
+import { assertInteractiveUser } from "./principal";
 import { COOKIE_NAME, ONE_YEAR_MS } from "../../shared/const.js";
 import type { Express, Request, Response } from "express";
 import { getUserByOpenId, upsertUser } from "../db";
@@ -138,7 +139,7 @@ export function registerOAuthRoutes(app: Express) {
   // Get current authenticated user - works with both cookie (web) and Bearer token (mobile)
   app.get("/api/auth/me", async (req: Request, res: Response) => {
     try {
-      const user = await sdk.authenticateRequest(req);
+      const user = assertInteractiveUser(await sdk.authenticateRequest(req));
       res.json({ user: buildUserResponse(user) });
     } catch (error) {
       const expectedAnonymousRequest = error instanceof HttpError && [401, 403].includes(error.statusCode);
@@ -153,7 +154,7 @@ export function registerOAuthRoutes(app: Express) {
   app.post("/api/auth/session", async (req: Request, res: Response) => {
     try {
       // Authenticate using Bearer token from Authorization header
-      const user = await sdk.authenticateRequest(req);
+      const user = assertInteractiveUser(await sdk.authenticateRequest(req));
 
       // Get the token from the Authorization header to set as cookie
       const authHeader = req.headers.authorization || req.headers.Authorization;

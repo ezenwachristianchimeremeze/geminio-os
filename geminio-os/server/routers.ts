@@ -2,18 +2,33 @@ import { z } from "zod";
 import { COOKIE_NAME } from "../shared/const.js";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
+import { redactForClient } from "./ai-core/redact";
+import { getOperation } from "./credits/operations";
+import { getMysqlOperationStore } from "./credits/operation-store";
+import { homeChatRouter } from "./home-chat/router";
+import { CreditError, finalizeReservation, grantCredits, reserveCredits } from "./credits/ledger";
+import { getMysqlCreditStore } from "./credits/mysql-store";
+import { adminProcedure, mergeRouters, protectedProcedure, publicProcedure, router } from "./_core/trpc";
+import { chatExtrasRouter } from "./routers/chat";
+import { aiBuilderRouter } from "./ai-builder/router";
+import { devPreviewRouter } from "./dev-preview/router";
+import { changeSetErrorCode, ChangeSetError } from "./live-builder/atomic-apply";
+import { jobsRouter } from "./routers/jobs";
+import { featuresRouter } from "./routers/features";
+import { advisorRouter } from "./routers/advisor";
 import { TRPCError } from "@trpc/server";
-import { findUsageRecord, insertAgentTask, insertCreditLedgerEntry, insertEntitlement, insertTaskApproval, insertUsageRecord, listAgentTasks, listCreditLedger, listEntitlements, listNotifications, markAllNotificationsRead, markNotificationRead, resolveTaskApproval, updateAgentTask } from "./geminio-data";
+import { findUsageRecord, insertAgentTask, insertCreditLedgerEntry, insertEntitlement, insertTaskApproval, insertUsageRecord, listAgentTasks, listCreditLedger, listEntitlements, listNotifications, markAllNotificationsRead, markNotificationRead, resolveTaskApproval, transitionAgentTask, updateAgentTask } from "./geminio-data";
 import { agentTaskSchema, approvalActionSchema, canTransitionTask, transitionTask, applyCreditDelta, taskStateSchema } from "../shared/geminio-contracts";
-import { invokeLLM } from "./_core/llm";
 import { aiCoreRequestSchema } from "../shared/geminio-contracts";
 import { cancelGatewayRun, getGatewayCapabilities, getGatewayEvents, getGatewayRun, getGatewayRunDetails, listGatewayDeadLetters, listGatewayRuns, recoverGatewayExpiredLeases, retryGatewayRun, submitGatewayRequest } from "./ai-core/gateway";
+import { approvalOutcomeError } from "./task-approvals";
+import { userOwnsProject } from "./ai-core/persistence";
+import { runControlCall } from "./ai-core/run-control";
 import { resumeApprovedTask } from "./ai-core/orchestrator";
-import { applyLiveBuilderChangeSet, createLiveBuilderWorkspace, getLiveBuilderWorkspace, listLiveBuilderWorkspaces, proposeLiveBuilderFileChange, proposeLiveBuilderPromptChange, requestLiveBuilderDeployment, restoreLiveBuilderVersion, setLiveBuilderSelection, startLiveBuilderPreview, validateLiveBuilderWorkspace } from "./live-builder/service";
+import { applyLiveBuilderChangeSet, createLiveBuilderWorkspace, getLiveBuilderWorkspace, listLiveBuilderWorkspaces, proposeLiveBuilderFileChange, proposeLiveBuilderPromptChange, requestLiveBuilderDeployment, restoreLiveBuilderVersion, setLiveBuilderSelection, startLiveBuilderPreview, validateLiveBuilderWorkspace , rejectLiveBuilderChangeSet, verifyLiveBuilderIntegrity, recoverLiveBuilderWorkspace} from "./live-builder/service";
 import { getLiveBuilderRuntime, listLiveBuilderRuntimes, listRuntimeEvents, rebuildLiveBuilderRuntime, restartLiveBuilderRuntime, startLiveBuilderRuntime, stopLiveBuilderRuntime } from "./live-builder/runtime";
 import { defaultRunnerControlPlane, ContainerProvider, MicroVMProvider } from "./live-builder/control-plane";
-import { defaultPreviewGateway } from "./live-builder/preview-gateway";
+import { defaultPreviewGateway, PreviewOwnershipError } from "./live-builder/preview-gateway";
 import { destinationForCapability } from "./ai-core/destinations";
 import {
   appBuilderRouter,
@@ -25,6 +40,20 @@ import {
 } from "./builders";
 
 const requestId = () => `req_${crypto.randomUUID()}`;
+
+
+/** Translate Live Builder domain errors into proper API status codes (structured problems are returned in the message). */
+async function liveBuilderCall<T>(run: () => Promise<T>): Promise<T> {
+  try {
+    return await run();
+  } catch (error) {
+    if (error instanceof TRPCError) throw error;
+    const code = changeSetErrorCode(error);
+    if (code === "INTERNAL_SERVER_ERROR" && !(error instanceof ChangeSetError)) throw error;
+    const problems = error instanceof ChangeSetError && error.problems.length ? ` ${error.problems.slice(0, 5).join("; ")}` : "";
+    throw new TRPCError({ code, message: `${(error as Error).message}${problems}`.slice(0, 1000), cause: error });
+  }
+}
 
 export const appRouter = router({
   // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -41,20 +70,21 @@ export const appRouter = router({
   }),
 
   // AI Chat Router
-  chat: router({
+  chat: mergeRouters(router({
     // Send a message to the AI and get a response
     sendMessage: publicProcedure
       .input(
         z.object({
-          message: z.string().min(1, "Message cannot be empty"),
+          message: z.string().min(1, "Message cannot be empty").max(20_000),
           conversationId: z.string().min(1).nullable().default(null),
           conversationHistory: z
             .array(
               z.object({
                 role: z.enum(["user", "assistant", "system"]),
-                content: z.string(),
+                content: z.string().max(20_000),
               })
             )
+            .max(50)
             .default([]),
         })
       )
@@ -82,23 +112,16 @@ export const appRouter = router({
             };
           }
 
-          const response = await invokeLLM({
-            messages: [
-              { role: "system", content: "You are Geminio, a helpful AI personal assistant. Be concise, friendly, and truthful about unavailable actions." },
-              ...input.conversationHistory,
-              { role: "user", content: input.message },
-            ],
-            model: "gpt-5-mini",
-          });
+          // Unauthenticated callers are refused: the old raw-LLM fallback was unmetered and used a hard-coded model.
           return {
-            success: true,
-            response: response.choices[0]?.message?.content || "I couldn't process that request.",
+            success: false,
+            response: "Please sign in to chat with Geminio.",
             timestamp: new Date(),
             runId: null,
             taskId: null,
             conversationId: null,
-            status: "completed" as const,
-            error: null,
+            status: "failed" as const,
+            error: { message: "Authentication required." },
             destination: null,
           };
         } catch (error) {
@@ -116,7 +139,11 @@ export const appRouter = router({
           };
         }
       }),
-  }),
+  }), chatExtrasRouter),
+
+  jobs: jobsRouter,
+  features: featuresRouter,
+  advisor: advisorRouter,
 
   notifications: router({
     list: protectedProcedure
@@ -129,29 +156,40 @@ export const appRouter = router({
       .mutation(({ ctx }) => markAllNotificationsRead(ctx.user.id)),
   }),
 
+  homeChat: homeChatRouter,
+
+  /** Read-only retrieval of persisted AI operation results. Never executes or charges. */
+  operations: router({
+    get: protectedProcedure.input(z.object({ id: z.string().min(1).max(64) })).query(async ({ input, ctx }) => {
+      const r = await getOperation(await getMysqlOperationStore(), ctx.user.id, input.id);
+      if (!r) throw new TRPCError({ code: "NOT_FOUND", message: "Operation not found." });
+      return redactForClient(r);
+    }),
+  }),
+
   aiCore: router({
     capabilities: protectedProcedure.query(() => ({ ok: true as const, requestId: requestId(), data: getGatewayCapabilities() })),
     submit: protectedProcedure
       .input(aiCoreRequestSchema)
-      .mutation(({ input, ctx }) => submitGatewayRequest(ctx.user.id, input)),
+      .mutation(async ({ input, ctx }) => redactForClient(await submitGatewayRequest(ctx.user.id, input))),
     getRun: protectedProcedure
       .input(z.object({ runId: z.string().min(1) }))
-      .query(({ input, ctx }) => getGatewayRun(ctx.user.id, input.runId)),
+      .query(async ({ input, ctx }) => redactForClient(await getGatewayRun(ctx.user.id, input.runId))),
     listRuns: protectedProcedure
       .input(z.object({ limit: z.number().int().min(1).max(100).default(30) }).default({ limit: 30 }))
-      .query(({ input, ctx }) => listGatewayRuns(ctx.user.id, input.limit)),
+      .query(async ({ input, ctx }) => redactForClient(await listGatewayRuns(ctx.user.id, input.limit))),
     getRunDetails: protectedProcedure
       .input(z.object({ runId: z.string().min(1) }))
-      .query(({ input, ctx }) => getGatewayRunDetails(ctx.user.id, input.runId)),
+      .query(async ({ input, ctx }) => redactForClient(await getGatewayRunDetails(ctx.user.id, input.runId))),
     events: protectedProcedure
       .input(z.object({ runId: z.string().min(1) }))
       .query(({ input, ctx }) => getGatewayEvents(ctx.user.id, input.runId)),
     cancel: protectedProcedure
       .input(z.object({ runId: z.string().min(1) }))
-      .mutation(({ input, ctx }) => cancelGatewayRun(ctx.user.id, input.runId)),
+      .mutation(({ input, ctx }) => runControlCall(() => cancelGatewayRun(ctx.user.id, input.runId))),
     retry: protectedProcedure
       .input(z.object({ runId: z.string().min(1) }))
-      .mutation(({ input, ctx }) => retryGatewayRun(ctx.user.id, input.runId)),
+      .mutation(({ input, ctx }) => runControlCall(() => retryGatewayRun(ctx.user.id, input.runId))),
     deadLetters: protectedProcedure
       .input(z.object({ limit: z.number().int().min(1).max(100).default(30) }).default({ limit: 30 }))
       .query(({ input, ctx }) => listGatewayDeadLetters(ctx.user.id, input.limit)),
@@ -198,7 +236,7 @@ export const appRouter = router({
       .mutation(async ({ input, ctx }) => ({
         ok: true as const,
         requestId: requestId(),
-        data: await setLiveBuilderSelection(ctx.user.id, input.workspaceId, input.selection),
+        data: await liveBuilderCall(() => setLiveBuilderSelection(ctx.user.id, input.workspaceId, input.selection)),
       })),
     proposeChange: protectedProcedure
       .input(z.object({
@@ -215,57 +253,70 @@ export const appRouter = router({
       .mutation(async ({ input, ctx }) => ({
         ok: true as const,
         requestId: requestId(),
-        data: await proposeLiveBuilderPromptChange(ctx.user.id, input),
+        data: await liveBuilderCall(() => proposeLiveBuilderPromptChange(ctx.user.id, input)),
       })),
     applyChange: protectedProcedure
       .input(z.object({ workspaceId: z.string().uuid(), changeSetId: z.string().uuid() }))
       .mutation(async ({ input, ctx }) => ({
         ok: true as const,
         requestId: requestId(),
-        data: await applyLiveBuilderChangeSet(ctx.user.id, input.workspaceId, input.changeSetId),
+        data: await liveBuilderCall(() => applyLiveBuilderChangeSet(ctx.user.id, input.workspaceId, input.changeSetId)),
       })),
+    rejectChange: protectedProcedure
+      .input(z.object({ workspaceId: z.string().uuid(), changeSetId: z.string().uuid() }))
+      .mutation(async ({ input, ctx }) => ({
+        ok: true as const,
+        requestId: requestId(),
+        data: await liveBuilderCall(() => rejectLiveBuilderChangeSet(ctx.user.id, input.workspaceId, input.changeSetId)),
+      })),
+    integrity: protectedProcedure
+      .input(z.object({ workspaceId: z.string().uuid() }))
+      .query(async ({ input, ctx }) => ({ ok: true as const, requestId: requestId(), data: await liveBuilderCall(() => verifyLiveBuilderIntegrity(ctx.user.id, input.workspaceId)) })),
+    recover: protectedProcedure
+      .input(z.object({ workspaceId: z.string().uuid() }))
+      .mutation(async ({ input, ctx }) => ({ ok: true as const, requestId: requestId(), data: await liveBuilderCall(() => recoverLiveBuilderWorkspace(ctx.user.id, input.workspaceId)) })),
     proposeFileChange: protectedProcedure
       .input(z.object({ workspaceId: z.string().uuid(), filePath: z.string().min(1).max(500), content: z.string().max(500_000), summary: z.string().trim().max(500).nullable().optional() }))
       .mutation(async ({ input, ctx }) => ({
         ok: true as const,
         requestId: requestId(),
-        data: await proposeLiveBuilderFileChange(ctx.user.id, input),
+        data: await liveBuilderCall(() => proposeLiveBuilderFileChange(ctx.user.id, input)),
       })),
     restoreVersion: protectedProcedure
       .input(z.object({ workspaceId: z.string().uuid(), versionId: z.string().uuid() }))
       .mutation(async ({ input, ctx }) => ({
         ok: true as const,
         requestId: requestId(),
-        data: await restoreLiveBuilderVersion(ctx.user.id, input.workspaceId, input.versionId),
+        data: await liveBuilderCall(() => restoreLiveBuilderVersion(ctx.user.id, input.workspaceId, input.versionId)),
       })),
     startPreview: protectedProcedure
       .input(z.object({ workspaceId: z.string().uuid(), target: z.enum(["phone", "tablet", "laptop", "desktop"]), engine: z.enum(["controlled_canvas", "external_runner"]).default("controlled_canvas") }))
       .mutation(async ({ input, ctx }) => ({
         ok: true as const,
         requestId: requestId(),
-        data: await startLiveBuilderPreview(ctx.user.id, input.workspaceId, input.target, input.engine),
+        data: await liveBuilderCall(() => startLiveBuilderPreview(ctx.user.id, input.workspaceId, input.target, input.engine)),
       })),
     startRuntime: protectedProcedure
       .input(z.object({ workspaceId: z.string().uuid(), target: z.enum(["phone", "tablet", "laptop", "desktop"]), engine: z.enum(["controlled_canvas", "external_runner"]).default("external_runner"), versionId: z.string().uuid().nullable().optional() }))
-      .mutation(async ({ input, ctx }) => ({ ok: true as const, requestId: requestId(), data: await startLiveBuilderRuntime(ctx.user.id, input) })),
+      .mutation(async ({ input, ctx }) => ({ ok: true as const, requestId: requestId(), data: await liveBuilderCall(() => startLiveBuilderRuntime(ctx.user.id, input)) })),
     stopRuntime: protectedProcedure
       .input(z.object({ sessionId: z.string().uuid() }))
-      .mutation(async ({ input, ctx }) => ({ ok: true as const, requestId: requestId(), data: await stopLiveBuilderRuntime(ctx.user.id, input.sessionId) })),
+      .mutation(async ({ input, ctx }) => ({ ok: true as const, requestId: requestId(), data: await liveBuilderCall(() => stopLiveBuilderRuntime(ctx.user.id, input.sessionId)) })),
     restartRuntime: protectedProcedure
       .input(z.object({ sessionId: z.string().uuid() }))
-      .mutation(async ({ input, ctx }) => ({ ok: true as const, requestId: requestId(), data: await restartLiveBuilderRuntime(ctx.user.id, input.sessionId) })),
+      .mutation(async ({ input, ctx }) => ({ ok: true as const, requestId: requestId(), data: await liveBuilderCall(() => restartLiveBuilderRuntime(ctx.user.id, input.sessionId)) })),
     rebuildRuntime: protectedProcedure
       .input(z.object({ sessionId: z.string().uuid() }))
-      .mutation(async ({ input, ctx }) => ({ ok: true as const, requestId: requestId(), data: await rebuildLiveBuilderRuntime(ctx.user.id, input.sessionId) })),
+      .mutation(async ({ input, ctx }) => ({ ok: true as const, requestId: requestId(), data: await liveBuilderCall(() => rebuildLiveBuilderRuntime(ctx.user.id, input.sessionId)) })),
     getRuntime: protectedProcedure
       .input(z.object({ sessionId: z.string().uuid() }))
-      .query(async ({ input, ctx }) => ({ ok: true as const, requestId: requestId(), data: await getLiveBuilderRuntime(ctx.user.id, input.sessionId) })),
+      .query(async ({ input, ctx }) => ({ ok: true as const, requestId: requestId(), data: await liveBuilderCall(() => getLiveBuilderRuntime(ctx.user.id, input.sessionId)) })),
     listRuntimes: protectedProcedure
       .input(z.object({ workspaceId: z.string().uuid() }))
-      .query(async ({ input, ctx }) => ({ ok: true as const, requestId: requestId(), data: await listLiveBuilderRuntimes(ctx.user.id, input.workspaceId) })),
+      .query(async ({ input, ctx }) => ({ ok: true as const, requestId: requestId(), data: await liveBuilderCall(() => listLiveBuilderRuntimes(ctx.user.id, input.workspaceId)) })),
     runtimeEvents: protectedProcedure
       .input(z.object({ sessionId: z.string().uuid() }))
-      .query(async ({ input, ctx }) => ({ ok: true as const, requestId: requestId(), data: await listRuntimeEvents(ctx.user.id, input.sessionId) })),
+      .query(async ({ input, ctx }) => ({ ok: true as const, requestId: requestId(), data: await liveBuilderCall(() => listRuntimeEvents(ctx.user.id, input.sessionId)) })),
     runnerStatus: protectedProcedure.query(() => ({
       ok: true as const,
       requestId: requestId(),
@@ -281,23 +332,39 @@ export const appRouter = router({
     })),
     createPreviewSession: protectedProcedure
       .input(z.object({ workspaceId: z.string().uuid(), versionId: z.string().uuid().nullable().optional(), runtimeSessionId: z.string().uuid().nullable().optional(), ttlMs: z.number().int().min(30_000).max(3_600_000).optional() }))
-      .mutation(({ input, ctx }) => ({ ok: true as const, requestId: requestId(), data: defaultPreviewGateway.create({ userId: ctx.user.id, ...input }) })),
+      .mutation(async ({ input, ctx }) => {
+        try {
+          const data = await defaultPreviewGateway.createVerified({ userId: ctx.user.id, ...input }, {
+            workspaceOwned: async (userId, workspaceId) => (await getLiveBuilderWorkspace(userId, workspaceId)) !== null,
+            // Newest 50 versions (what getLiveBuilderWorkspace returns); older versions must be restored first.
+            versionInWorkspace: async (userId, workspaceId, versionId) => Boolean((await getLiveBuilderWorkspace(userId, workspaceId))?.versions.some((v) => v.id === versionId)),
+            runtimeInWorkspace: async (userId, workspaceId, sessionId) => { try { return (await getLiveBuilderRuntime(userId, sessionId)).session.workspaceId === workspaceId; } catch { return false; } },
+          });
+          return { ok: true as const, requestId: requestId(), data };
+        } catch (e) {
+          if (e instanceof PreviewOwnershipError) throw new TRPCError({ code: "NOT_FOUND", message: e.message });
+          throw e;
+        }
+      }),
     revokePreviewSession: protectedProcedure
       .input(z.object({ sessionId: z.string().min(1) }))
-      .mutation(({ input, ctx }) => ({ ok: true as const, requestId: requestId(), data: defaultPreviewGateway.revoke(ctx.user.id, input.sessionId) })),
+      .mutation(({ input, ctx }) => {
+        try { return { ok: true as const, requestId: requestId(), data: defaultPreviewGateway.revoke(ctx.user.id, input.sessionId) }; }
+        catch (e) { throw new TRPCError({ code: "NOT_FOUND", message: e instanceof Error ? e.message : "Preview session not found" }); }
+      }),
     validate: protectedProcedure
       .input(z.object({ workspaceId: z.string().uuid(), target: z.enum(["phone", "tablet", "laptop", "desktop"]), changeSetId: z.string().uuid().nullable().optional() }))
       .mutation(async ({ input, ctx }) => ({
         ok: true as const,
         requestId: requestId(),
-        data: await validateLiveBuilderWorkspace(ctx.user.id, input.workspaceId, input.target, input.changeSetId),
+        data: await liveBuilderCall(() => validateLiveBuilderWorkspace(ctx.user.id, input.workspaceId, input.target, input.changeSetId)),
       })),
     requestDeployment: protectedProcedure
       .input(z.object({ workspaceId: z.string().uuid(), versionId: z.string().uuid(), releaseNotes: z.string().trim().max(4_000).nullable().optional() }))
       .mutation(async ({ input, ctx }) => ({
         ok: true as const,
         requestId: requestId(),
-        data: await requestLiveBuilderDeployment(ctx.user.id, input.workspaceId, input.versionId, input.releaseNotes),
+        data: await liveBuilderCall(() => requestLiveBuilderDeployment(ctx.user.id, input.workspaceId, input.versionId, input.releaseNotes)),
       })),
   }),
 
@@ -305,6 +372,7 @@ export const appRouter = router({
     createTask: protectedProcedure
       .input(z.object({ title: z.string().min(1).max(255), projectId: z.string().min(1).nullable().default(null), requiresApproval: z.boolean().default(false) }))
       .mutation(async ({ input, ctx }) => {
+        if (input.projectId && !(await userOwnsProject(ctx.user.id, input.projectId))) throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
         const id = `task_${crypto.randomUUID()}`;
         const created = await insertAgentTask({ id, userId: ctx.user.id, projectId: input.projectId, title: input.title, state: "queued", progress: 0, requiresApproval: input.requiresApproval, currentApprovalId: null, lastError: null, checkpoint: null });
         if (!created) throw new TRPCError({ code: "SERVICE_UNAVAILABLE", message: "Task storage is unavailable." });
@@ -319,9 +387,11 @@ export const appRouter = router({
         if (!canTransitionTask(existing.state, input.nextState)) throw new TRPCError({ code: "PRECONDITION_FAILED", message: `Invalid task transition: ${existing.state} -> ${input.nextState}` });
         const converted = agentTaskSchema.parse({ id: existing.id, ownerId: existing.userId, projectId: existing.projectId ?? null, title: existing.title, state: existing.state, progress: existing.progress, requiresApproval: existing.requiresApproval, currentApprovalId: existing.currentApprovalId ?? null, lastError: existing.lastError ?? null, checkpoint: existing.checkpoint ?? null, createdAt: existing.createdAt, updatedAt: existing.updatedAt });
         const next = transitionTask(converted, input.nextState, { progress: input.progress, checkpoint: input.checkpoint, lastError: input.lastError });
-        const updated = await updateAgentTask(input.taskId, ctx.user.id, { state: next.state, progress: next.progress, checkpoint: next.checkpoint, lastError: next.lastError });
-        if (!updated) throw new TRPCError({ code: "SERVICE_UNAVAILABLE", message: "Task storage is unavailable." });
-        return { ok: true as const, requestId: requestId(), data: updated };
+        // Compare-and-set on the state validated above: a concurrent transition from another client makes this one a conflict, not a blind overwrite.
+        const result = await transitionAgentTask(input.taskId, ctx.user.id, existing.state, { state: next.state, progress: next.progress, checkpoint: next.checkpoint, lastError: next.lastError });
+        if (!result) throw new TRPCError({ code: "SERVICE_UNAVAILABLE", message: "Task storage is unavailable." });
+        if (!result.applied) throw new TRPCError({ code: "CONFLICT", message: "The task changed state while you were updating it. Refresh and try again." });
+        return { ok: true as const, requestId: requestId(), data: result.task };
       }),
     requestApproval: protectedProcedure
       .input(z.object({ taskId: z.string().min(1), action: approvalActionSchema, summary: z.string().min(1).max(2000) }))
@@ -337,47 +407,48 @@ export const appRouter = router({
     resolveApproval: protectedProcedure
       .input(z.object({ approvalId: z.string().min(1), decision: z.enum(["approved", "rejected"]) }))
       .mutation(async ({ input, ctx }) => {
-        const approval = await resolveTaskApproval(input.approvalId, ctx.user.id, input.decision);
-        if (!approval) throw new TRPCError({ code: "NOT_FOUND", message: "Approval not found." });
-        const resumed = input.decision === "approved" ? await resumeApprovedTask(ctx.user.id, approval.taskId) : null;
+        const result = await resolveTaskApproval(input.approvalId, ctx.user.id, input.decision, (a) => resumeApprovedTask(ctx.user.id, a.taskId));
+        if (!result) throw new TRPCError({ code: "SERVICE_UNAVAILABLE", message: "Approval storage is unavailable." });
+        // Foreign and unknown ids are indistinguishable; a different already-recorded decision is a conflict; neither changes anything or starts work.
+        const failure = approvalOutcomeError(result.outcome);
+        if (failure) throw new TRPCError(failure);
+        const approval = (result.outcome as { approval: unknown }).approval;
+        const resumed = result.resumed;
         return { ok: true as const, requestId: requestId(), data: { approval, resumed } };
       }),
   }),
   credits: router({
     ledger: protectedProcedure.query(async ({ ctx }) => ({ ok: true as const, requestId: requestId(), data: await listCreditLedger(ctx.user.id) })),
     entitlements: protectedProcedure.query(async ({ ctx }) => ({ ok: true as const, requestId: requestId(), data: await listEntitlements(ctx.user.id) })),
-    recordUsage: protectedProcedure
-      .input(z.object({ capability: z.string().min(1).max(100), units: z.number().positive(), creditsCharged: z.number().positive(), requestId: z.string().min(1) }))
+    // Operator-only: usage must be metered by the server, never reported by a client.
+    // (Server-side metering inside AI Core + an atomic ledger is still on the roadmap: GO-AIC-006/007.)
+    recordUsage: adminProcedure
+      .input(z.object({ capability: z.string().min(1).max(100), units: z.number().positive(), creditsCharged: z.number().positive(), requestId: z.string().min(1).max(64) }))
       .mutation(async ({ input, ctx }) => {
-        const existingUsage = await findUsageRecord(ctx.user.id, input.requestId);
-        if (existingUsage) {
-          return { ok: true as const, requestId: requestId(), data: { ledgerEntry: null, usage: existingUsage, replayed: true as const } };
+        const store = await getMysqlCreditStore();
+        try {
+          const r = await reserveCredits(store, { userId: ctx.user.id, requestId: `usage:${input.requestId}`.slice(0, 64), capability: input.capability, credits: input.creditsCharged, id: `res_${crypto.randomUUID()}`.slice(0, 64) });
+          const done = await finalizeReservation(store, r.id, input.creditsCharged);
+          return { ok: true as const, requestId: requestId(), data: { charged: done.charged / 1_000_000, status: done.status } };
+        } catch (e) {
+          if (e instanceof CreditError && e.code === "INSUFFICIENT_CREDITS") throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Insufficient credits." });
+          throw e;
         }
-        const ledger = await listCreditLedger(ctx.user.id);
-        const currentBalance = ledger[0] ? Number(ledger[0].balanceAfter) : 0;
-        let nextBalance: number;
-        try { nextBalance = applyCreditDelta(currentBalance, -input.creditsCharged); } catch { throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Insufficient credits." }); }
-        const ledgerEntry = await insertCreditLedgerEntry({ id: `credit_${crypto.randomUUID()}`, userId: ctx.user.id, kind: "usage", amount: (-input.creditsCharged).toFixed(6), balanceAfter: nextBalance.toFixed(6), capability: input.capability, referenceId: input.requestId, createdAt: new Date() });
-        const usage = await insertUsageRecord({ id: `usage_${crypto.randomUUID()}`, userId: ctx.user.id, capability: input.capability, units: input.units.toFixed(6), creditsCharged: input.creditsCharged.toFixed(6), requestId: input.requestId, createdAt: new Date() });
-        if (!ledgerEntry || !usage) throw new TRPCError({ code: "SERVICE_UNAVAILABLE", message: "Usage storage is unavailable." });
-        return { ok: true as const, requestId: requestId(), data: { ledgerEntry, usage } };
       }),
     grant: protectedProcedure
-      .input(z.object({ amount: z.number().positive(), kind: z.enum(["grant", "purchase", "refund", "adjustment"]), referenceId: z.string().nullable().default(null) }))
+      .input(z.object({ amount: z.number().positive(), kind: z.enum(["grant", "purchase", "refund", "adjustment"]), referenceId: z.string().max(64).nullable().default(null) }))
       .mutation(async ({ input, ctx }) => {
         if (ctx.user.role !== "admin") {
           throw new TRPCError({ code: "FORBIDDEN", message: "Credit grants require an administrator or trusted billing callback." });
         }
-        const ledger = await listCreditLedger(ctx.user.id);
-        const currentBalance = ledger[0] ? Number(ledger[0].balanceAfter) : 0;
-        const nextBalance = applyCreditDelta(currentBalance, input.amount);
-        const entry = await insertCreditLedgerEntry({ id: `credit_${crypto.randomUUID()}`, userId: ctx.user.id, kind: input.kind, amount: input.amount.toFixed(6), balanceAfter: nextBalance.toFixed(6), capability: null, referenceId: input.referenceId, createdAt: new Date() });
-        if (!entry) throw new TRPCError({ code: "SERVICE_UNAVAILABLE", message: "Credit storage is unavailable." });
-        return { ok: true as const, requestId: requestId(), data: entry };
+        const out = await grantCredits(await getMysqlCreditStore(), { userId: ctx.user.id, credits: input.amount, kind: input.kind, referenceId: input.referenceId ?? `admin_${crypto.randomUUID()}`.slice(0, 60) });
+        return { ok: true as const, requestId: requestId(), data: out };
       }),
   }),
 
   // AI Builder Routers
+  aiBuilder: aiBuilderRouter,
+  devPreview: devPreviewRouter,
   appBuilder: appBuilderRouter,
   websiteBuilder: websiteBuilderRouter,
   workflowBuilder: workflowBuilderRouter,

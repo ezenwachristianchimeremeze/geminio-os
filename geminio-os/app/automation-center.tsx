@@ -135,7 +135,7 @@ export default function AutomationCenterScreen() {
         onPress={() => deleteAutomation(automation.id)}
         className="mt-3 pt-3 border-t border-border items-center"
       >
-        <Text className="text-sm text-red-500 font-semibold">Delete</Text>
+        <Text className="text-sm text-errorText font-semibold">Delete</Text>
       </Pressable>
     </View>
   );
@@ -194,7 +194,7 @@ export default function AutomationCenterScreen() {
                 }}
                 className="mt-3 bg-primary rounded-lg p-2 items-center"
               >
-                <Text className="text-white text-sm font-semibold">Use Template</Text>
+                <Text className="text-primaryForeground text-sm font-semibold">Use Template</Text>
               </Pressable>
             </View>
           ))}
@@ -216,7 +216,7 @@ export default function AutomationCenterScreen() {
           ]}
           className="bg-primary rounded-lg p-4 items-center justify-center"
         >
-          <Text className="text-white font-semibold text-lg">+ Create Automation</Text>
+          <Text className="text-primaryForeground font-semibold text-lg">+ Create Automation</Text>
         </Pressable>
       </View>
 
@@ -293,7 +293,7 @@ export default function AutomationCenterScreen() {
                 disabled={!newAutomation.name.trim()}
                 className="flex-1 bg-primary rounded-lg p-3 items-center"
               >
-                <Text className="text-white font-semibold">Create</Text>
+                <Text className="text-primaryForeground font-semibold">Create</Text>
               </Pressable>
             </View>
           </View>

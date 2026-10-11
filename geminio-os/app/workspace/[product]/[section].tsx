@@ -5,6 +5,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import { AppIcon, IconButton, ScreenHeader } from "@/components/super-app";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
+import { accentAsText, onFill } from "@/lib/contrast";
 import { useAuth } from "@/hooks/use-auth";
 import { trpc } from "@/lib/trpc";
 import { getProductById, type MaterialIconName, type ProductDefinition, type ProductSection } from "@/lib/product-catalog";
@@ -180,20 +181,20 @@ export default function ProductSectionRoute() {
         <View style={styles.stateRow}>
           {(["ready", "loading", "empty", "error"] as ScreenState[]).map((value) => (
             <Pressable key={value} accessibilityRole="button" accessibilityLabel={`Show ${value} state`} onPress={() => setState(value)} style={({ pressed }) => [styles.stateChip, { borderColor: state === value ? product.accent : colors.border, backgroundColor: state === value ? product.surface : colors.surface }, pressed && styles.pressed]}>
-              <Text style={{ color: state === value ? product.accent : colors.muted, fontSize: 11, fontWeight: "800", textTransform: "capitalize" }}>{value}</Text>
+              <Text style={{ color: state === value ? accentAsText(product.accent, colors.surface) : colors.muted, fontSize: 11, fontWeight: "800", textTransform: "capitalize" }}>{value}</Text>
             </Pressable>
           ))}
         </View>
 
         <View style={[styles.heroCard, { backgroundColor: product.surface }]}>
-          <View style={[styles.heroIcon, { backgroundColor: product.accent }]}><AppIcon name={blueprint.icon} color="#FFFFFF" size={24} /></View>
+          <View style={[styles.heroIcon, { backgroundColor: onFill(product.accent).fill }]}><AppIcon name={blueprint.icon} color={onFill(product.accent).text} size={24} /></View>
           <View style={styles.heroCopy}><Text style={[styles.heroTitle, { color: colors.foreground }]}>{state === "loading" ? "Updating this workspace…" : state === "error" ? "Something needs attention" : state === "empty" ? "Nothing here yet" : blueprint.title}</Text><Text style={[styles.heroText, { color: colors.muted }]}>{state === "error" ? "The request could not be completed. Check your connection and retry." : state === "empty" ? "Start with the primary action to create the first item." : "Every action remains reviewable, reversible where possible, and explicit about provider state."}</Text></View>
         </View>
 
         {(section === "Search" || blueprint.form) ? <View style={[styles.formCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Text style={[styles.formLabel, { color: colors.foreground }]}>{section === "Search" ? "Search this workspace" : blueprint.form}</Text>
           <TextInput value={section === "Search" ? query : draft} onChangeText={section === "Search" ? setQuery : setDraft} placeholder={section === "Search" ? `Search ${product.name}` : `Enter ${blueprint.form?.toLowerCase()}`} placeholderTextColor={colors.muted} style={[styles.input, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.background }]} returnKeyType="done" />
-          <Pressable accessibilityRole="button" onPress={executePrimary} style={({ pressed }) => [styles.primaryButton, { backgroundColor: product.accent }, pressed && styles.pressed]}><AppIcon name={section === "Search" ? "search" : "add"} size={18} color="#FFFFFF" /><Text style={styles.primaryButtonText}>{blueprint.primaryAction}</Text></Pressable>
+          <Pressable accessibilityRole="button" onPress={executePrimary} style={({ pressed }) => [styles.primaryButton, { backgroundColor: onFill(product.accent).fill }, pressed && styles.pressed]}><AppIcon name={section === "Search" ? "search" : "add"} size={18} color={onFill(product.accent).text} /><Text style={[styles.primaryButtonText, { color: onFill(product.accent).text }]}>{blueprint.primaryAction}</Text></Pressable>
         </View> : null}
 
         {state === "error" ? <View style={[styles.notice, { backgroundColor: `${colors.error}12`, borderColor: colors.error }]}><AppIcon name="error-outline" color={colors.error} size={20} /><Text style={[styles.noticeText, { color: colors.foreground }]}>We could not load this screen. Your local draft is safe.</Text><Pressable accessibilityRole="button" onPress={retrySection}><Text style={{ color: colors.error, fontWeight: "800" }}>Retry</Text></Pressable></View> : null}

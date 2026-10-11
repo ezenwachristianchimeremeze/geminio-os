@@ -1,6 +1,7 @@
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import type { User } from "../../drizzle/schema";
 import { sdk } from "./sdk";
+import { interactiveUserOrNull } from "./principal";
 
 export type TrpcContext = {
   req: CreateExpressContextOptions["req"];
@@ -12,7 +13,8 @@ export async function createContext(opts: CreateExpressContextOptions): Promise<
   let user: User | null = null;
 
   try {
-    user = await sdk.authenticateRequest(opts.req);
+    // OPEN-004: scheduled-task (cron, id -1) principals never reach user-facing procedures.
+    user = interactiveUserOrNull(await sdk.authenticateRequest(opts.req));
   } catch (error) {
     // Authentication is optional for public procedures.
     user = null;

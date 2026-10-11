@@ -41,14 +41,14 @@ export default function VoiceOSScreen() {
                 className="flex-1 bg-primary rounded-lg py-3 items-center"
                 style={({ pressed }) => [pressed && { opacity: 0.8 }]}
               >
-                <Text className="text-white font-semibold">Start Listening</Text>
+                <Text className="text-primaryForeground font-semibold">Start Listening</Text>
               </Pressable>
               <Pressable
                 onPress={stopListening}
                 className="flex-1 bg-error rounded-lg py-3 items-center"
                 style={({ pressed }) => [pressed && { opacity: 0.8 }]}
               >
-                <Text className="text-white font-semibold">Stop</Text>
+                <Text className="text-errorForeground font-semibold">Stop</Text>
               </Pressable>
             </View>
           </View>
@@ -71,7 +71,7 @@ export default function VoiceOSScreen() {
                       settings.voiceType === 'male' ? 'bg-primary' : 'bg-border'
                     }`}
                   >
-                    <Text className={settings.voiceType === 'male' ? 'text-white' : 'text-foreground'}>
+                    <Text className={settings.voiceType === 'male' ? 'text-primaryForeground' : 'text-foreground'}>
                       Male
                     </Text>
                   </Pressable>
@@ -81,7 +81,7 @@ export default function VoiceOSScreen() {
                       settings.voiceType === 'female' ? 'bg-primary' : 'bg-border'
                     }`}
                   >
-                    <Text className={settings.voiceType === 'female' ? 'text-white' : 'text-foreground'}>
+                    <Text className={settings.voiceType === 'female' ? 'text-primaryForeground' : 'text-foreground'}>
                       Female
                     </Text>
                   </Pressable>
@@ -104,7 +104,7 @@ export default function VoiceOSScreen() {
                       settings.language === lang ? 'bg-primary' : 'bg-border'
                     }`}
                   >
-                    <Text className={settings.language === lang ? 'text-white' : 'text-foreground'}>
+                    <Text className={settings.language === lang ? 'text-primaryForeground' : 'text-foreground'}>
                       {lang.toUpperCase()}
                     </Text>
                   </Pressable>

@@ -17,10 +17,11 @@ interface Task {
 }
 
 const PRIORITY_COLORS = {
-  high: "bg-red-500",
-  medium: "bg-yellow-500",
-  low: "bg-green-500",
+  high: "bg-error",
+  medium: "bg-warning",
+  low: "bg-success",
 };
+const PRIORITY_TEXT: Record<string, string> = { high: "text-errorForeground", medium: "text-warningForeground", low: "text-successForeground" };
 
 export default function TaskManagementScreen() {
   const colors = useColors();
@@ -107,7 +108,7 @@ export default function TaskManagementScreen() {
           task.completed ? "bg-primary border-primary" : "border-border"
         }`}
       >
-        {task.completed && <Text className="text-white text-sm">✓</Text>}
+        {task.completed && <Text className="text-primaryForeground text-sm">✓</Text>}
       </Pressable>
 
       <View className="flex-1">
@@ -127,7 +128,8 @@ export default function TaskManagementScreen() {
               PRIORITY_COLORS[task.priority]
             }`}
           >
-            <Text className="text-white text-xs font-semibold">
+            {/* all semantic foreground tokens are AA-safe on their fill; priority fill is error/warning/success */}
+            <Text className={`text-xs font-semibold ${PRIORITY_TEXT[task.priority]}`}>
               {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
             </Text>
           </View>
@@ -189,7 +191,7 @@ export default function TaskManagementScreen() {
           ]}
           className="bg-primary rounded-lg p-4 items-center justify-center"
         >
-          <Text className="text-white font-semibold text-lg">+ Add Task</Text>
+          <Text className="text-primaryForeground font-semibold text-lg">+ Add Task</Text>
         </Pressable>
       </View>
 
@@ -284,7 +286,7 @@ export default function TaskManagementScreen() {
                 disabled={!newTask.title.trim()}
                 className="flex-1 bg-primary rounded-lg p-3 items-center"
               >
-                <Text className="text-white font-semibold">Create Task</Text>
+                <Text className="text-primaryForeground font-semibold">Create Task</Text>
               </Pressable>
             </View>
           </View>

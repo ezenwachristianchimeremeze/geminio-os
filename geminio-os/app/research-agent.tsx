@@ -160,7 +160,7 @@ export default function ResearchAgentScreen() {
               {isResearching ? (
                 <ActivityIndicator color="white" />
               ) : (
-                <Text className="text-white font-semibold">Start Research</Text>
+                <Text className="text-primaryForeground font-semibold">Start Research</Text>
               )}
             </Pressable>
           </View>
@@ -227,7 +227,7 @@ export default function ResearchAgentScreen() {
                 }}
                 className="flex-1 bg-primary rounded-lg p-3 items-center"
               >
-                <Text className="text-white font-semibold">New Research</Text>
+                <Text className="text-primaryForeground font-semibold">New Research</Text>
               </Pressable>
             </View>
           </View>

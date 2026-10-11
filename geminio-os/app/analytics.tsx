@@ -35,15 +35,15 @@ export default function AnalyticsScreen() {
     { name: "Work", value: 45, color: "bg-blue-500" },
     { name: "Learning", value: 25, color: "bg-purple-500" },
     { name: "Personal", value: 20, color: "bg-pink-500" },
-    { name: "Health", value: 10, color: "bg-green-500" },
+    { name: "Health", value: 10, color: "bg-success" },
   ];
 
   const MetricCard = ({ metric }: { metric: Metric }) => (
     <View className="flex-1 bg-surface border border-border rounded-lg p-4 mr-3">
       <View className="flex-row items-center justify-between mb-2">
         <Text className="text-2xl">{metric.icon}</Text>
-        <View className={`px-2 py-1 rounded-full ${metric.change > 0 ? "bg-green-500/20" : "bg-red-500/20"}`}>
-          <Text className={`text-xs font-semibold ${metric.change > 0 ? "text-green-600" : "text-red-600"}`}>
+        <View className={`px-2 py-1 rounded-full ${metric.change > 0 ? "bg-success/20" : "bg-error/20"}`}>
+          <Text className={`text-xs font-semibold ${metric.change > 0 ? "text-successText" : "text-errorText"}`}>
             {metric.change > 0 ? "+" : ""}{metric.change}%
           </Text>
         </View>
@@ -159,7 +159,7 @@ export default function AnalyticsScreen() {
           <Text className="text-lg font-semibold text-foreground mb-4">Export</Text>
           <View className="flex-row gap-3">
             <Pressable className="flex-1 bg-primary rounded-lg p-3 items-center">
-              <Text className="text-white font-semibold">📄 PDF Report</Text>
+              <Text className="text-primaryForeground font-semibold">📄 PDF Report</Text>
             </Pressable>
             <Pressable className="flex-1 bg-surface border border-border rounded-lg p-3 items-center">
               <Text className="text-foreground font-semibold">📊 CSV Export</Text>

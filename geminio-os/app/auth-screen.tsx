@@ -85,7 +85,7 @@ export default function AuthScreen() {
           {!showPinSetup ? (
             <View className="w-full gap-4">
               <View className="gap-3">
-                <Pressable onPress={() => router.push({ pathname: '/auth/[flow]', params: { flow: 'sign-in' } })} style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]} className="bg-primary rounded-2xl p-4 items-center"><Text className="text-white font-semibold text-lg">Sign in with account</Text></Pressable>
+                <Pressable onPress={() => router.push({ pathname: '/auth/[flow]', params: { flow: 'sign-in' } })} style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]} className="bg-primary rounded-2xl p-4 items-center"><Text className="text-primaryForeground font-semibold text-lg">Sign in with account</Text></Pressable>
                 <Pressable onPress={() => router.push({ pathname: '/auth/[flow]', params: { flow: 'sign-up' } })} style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]} className="border border-primary rounded-2xl p-4 items-center"><Text className="text-primary font-semibold text-lg">Create an account</Text></Pressable>
                 <View className="flex-row justify-center gap-5">
                   <Pressable onPress={() => router.push({ pathname: '/auth/[flow]', params: { flow: 'recovery' } })}><Text className="text-primary font-medium">Recover access</Text></Pressable>
@@ -108,7 +108,7 @@ export default function AuthScreen() {
                   ]}
                   className="bg-primary rounded-2xl p-4 items-center"
                 >
-                  <Text className="text-white font-semibold text-lg">
+                  <Text className="text-primaryForeground font-semibold text-lg">
                     Authenticate with Face ID
                   </Text>
                 </Pressable>
@@ -127,7 +127,7 @@ export default function AuthScreen() {
                   ]}
                   className="bg-accent rounded-2xl p-4 items-center"
                 >
-                  <Text className="text-white font-semibold text-lg">
+                  <Text className="text-accentForeground font-semibold text-lg">
                     Authenticate with Fingerprint
                   </Text>
                 </Pressable>
@@ -206,7 +206,7 @@ export default function AuthScreen() {
                 ]}
                 className="bg-primary rounded-2xl p-4 items-center"
               >
-                <Text className="text-white font-semibold text-lg">
+                <Text className="text-primaryForeground font-semibold text-lg">
                   {isLoading ? 'Setting up...' : 'Set PIN'}
                 </Text>
               </Pressable>

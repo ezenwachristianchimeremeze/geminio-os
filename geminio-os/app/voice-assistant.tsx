@@ -131,7 +131,7 @@ export default function VoiceAssistantScreen() {
             ]}
             className="bg-primary rounded-full px-8 py-4 items-center justify-center"
           >
-            <Text className="text-white font-semibold text-lg">
+            <Text className="text-primaryForeground font-semibold text-lg">
               {isListening || isProcessing ? "Processing..." : "Start Listening"}
             </Text>
           </Pressable>

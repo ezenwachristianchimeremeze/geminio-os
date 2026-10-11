@@ -154,7 +154,7 @@ export function TabBadge({
         className
       )}
     >
-      <Text className="text-white text-xs font-bold">{displayCount}</Text>
+      <Text className="text-errorForeground text-xs font-bold">{displayCount}</Text>
     </View>
   );
 }

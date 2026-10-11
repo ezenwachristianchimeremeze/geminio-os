@@ -103,7 +103,7 @@ export default function KnowledgeScreen() {
               ]}
               className="bg-primary rounded-2xl p-4 items-center"
             >
-              <Text className="text-white font-semibold">
+              <Text className="text-primaryForeground font-semibold">
                 + Create New Note
               </Text>
             </Pressable>
@@ -133,7 +133,7 @@ export default function KnowledgeScreen() {
                   onPress={handleAddNote}
                   className="flex-1 bg-primary rounded-lg p-3 items-center"
                 >
-                  <Text className="text-white font-semibold">
+                  <Text className="text-primaryForeground font-semibold">
                     Save Note
                   </Text>
                 </Pressable>
