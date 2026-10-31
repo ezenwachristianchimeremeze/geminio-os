@@ -19,7 +19,11 @@ export async function getDb() {
   return _db;
 }
 
-export async function upsertUser(user: InsertUser): Promise<void> {\n  if (user.openId?.startsWith("google:")) {\n    if (user.lastSignedIn) await upsertGoogleLastSignedIn(user.openId, user.lastSignedIn);\n    return;\n  }
+export async function upsertUser(user: InsertUser): Promise<void> {
+  if (user.openId?.startsWith("google:")) {
+    if (user.lastSignedIn) await upsertGoogleLastSignedIn(user.openId, user.lastSignedIn);
+    return;
+  }
   if (!user.openId) {
     throw new Error("User openId is required for upsert");
   }
@@ -78,7 +82,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {\n  if (user.
   }
 }
 
-export async function getUserByOpenId(openId: string) {\n  if (openId.startsWith("google:")) return getSupabaseGoogleUser(openId);
+export async function getUserByOpenId(openId: string) {
+  if (openId.startsWith("google:")) return getSupabaseGoogleUser(openId);
   const db = await getDb();
   if (!db) {
     console.warn("[Database] Cannot get user: database not available");
