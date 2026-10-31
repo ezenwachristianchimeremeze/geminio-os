@@ -7,7 +7,7 @@ import { COOKIE_NAME, ONE_YEAR_MS } from "../../shared/const.js";
 import { getSessionCookieOptions } from "./cookies";
 
 const scrypt = promisify(scryptCallback);
-const pool = mysql.createPool({ uri: process.env.DATABASE_URL, connectionLimit: 5, enableKeepAlive: true });
+const pool = mysql.createPool(process.env.DATABASE_URL || "mysql://invalid:invalid@127.0.0.1:3306/invalid");
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const hash = (v: string) => createHash("sha256").update(v).digest("hex");
 const token = () => randomBytes(32).toString("base64url");
