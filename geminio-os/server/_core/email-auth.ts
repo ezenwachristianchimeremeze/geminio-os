@@ -102,10 +102,29 @@ export function registerEmailAuthRoutes(app: Express) {
     const code = typeof req.body?.code === "string" ? req.body.code.trim().toUpperCase() : "";
     if (!emailPattern.test(email) || !/^[A-Z0-9]{6}$/.test(code)) return jsonError(res,400,"Enter your email and 6-character verification code.");
     try {
-      const [rows] = await pool.execute<mysql.RowDataPacket[]>("SELECT t.id,t.userId,u.openId,u.name FROM auth_action_tokens t JOIN auth_credentials c ON c.userId=t.userId JOIN users u ON u.id=t.userId WHERE c.email=? AND t.tokenHash=? AND t.purpose='verify' AND t.consumedAt IS NULL AND t.expiresAt>NOW() ORDER BY t.id DESC LIMIT 1",[email,hash(code)]);
-      const item=rows[0]; if(!item) return jsonError(res,400,"The code is invalid or expired.");
-      await pool.execute("UPDATE auth_action_tokens SET consumedAt=NOW() WHERE id=? AND consumedAt IS NULL",[item.id]);
-      await pool.execute("UPDATE auth_credentials SET emailVerified=1 WHERE userId=?",[item.userId]);
+      const connection = await pool.getConnection();
+      let item: mysql.RowDataPacket | undefined;
+      try {
+        await connection.beginTransaction();
+        const [rows] = await connection.execute<mysql.RowDataPacket[]>("SELECT t.id,t.userId,u.openId,u.name FROM auth_action_tokens t JOIN auth_credentials c ON c.userId=t.userId JOIN users u ON u.id=t.userId WHERE c.email=? AND t.tokenHash=? AND t.purpose='verify' AND t.consumedAt IS NULL AND t.expiresAt>NOW() ORDER BY t.id DESC LIMIT 1 FOR UPDATE",[email,hash(code)]);
+        item = rows[0];
+        if (!item) {
+          await connection.rollback();
+          return jsonError(res,400,"The code is invalid or expired.");
+        }
+        const [consumed] = await connection.execute<mysql.ResultSetHeader>("UPDATE auth_action_tokens SET consumedAt=NOW() WHERE id=? AND consumedAt IS NULL AND expiresAt>NOW()",[item.id]);
+        if (consumed.affectedRows !== 1) {
+          await connection.rollback();
+          return jsonError(res,400,"The code is invalid, expired, or already used.");
+        }
+        await connection.execute("UPDATE auth_credentials SET emailVerified=1 WHERE userId=?",[item.userId]);
+        await connection.commit();
+      } catch (error) {
+        await connection.rollback();
+        throw error;
+      } finally {
+        connection.release();
+      }
       await createSession(res,req,item.openId,item.name || "");
       return res.json({ok:true,message:"Email verified.",user:{name:item.name,email}});
     } catch(e) { console.error("[auth] verification failed",e); return jsonError(res,503,"Verification is temporarily unavailable."); }
