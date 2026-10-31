@@ -153,8 +153,31 @@ export function registerEmailAuthRoutes(app: Express) {
       if(rows[0]) {
         await pool.execute("UPDATE auth_action_tokens SET consumedAt=NOW() WHERE userId=? AND purpose='reset' AND consumedAt IS NULL",[rows[0].userId]);
         const raw=token(); await pool.execute("INSERT INTO auth_action_tokens (tokenHash,userId,purpose,expiresAt) VALUES (?,?, 'reset', DATE_ADD(NOW(), INTERVAL 15 MINUTE))",[hash(raw),rows[0].userId]);
-        const base=(process.env.AUTH_PUBLIC_URL||process.env.EXPO_PUBLIC_APP_URL||"").replace(/\/$/,"");
-        await sendAuthEmail(email,"Reset your Geminio OS password","<p><a href='"+base+"/auth/reset-password?token="+encodeURIComponent(raw)+"'>Reset your password</a></p><p>Link expires in 15 minutes.</p>");
+        const configuredBase = process.env.AUTH_PUBLIC_URL || process.env.EXPO_PUBLIC_APP_URL || "";
+        let resetUrl: URL | null = null;
+        try {
+          const parsed = new URL(configuredBase);
+          if (parsed.protocol === "https:" || parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") {
+            parsed.pathname = parsed.pathname.replace(/\/$/, "") + "/auth/reset-password";
+            parsed.search = "";
+            parsed.hash = "";
+            parsed.searchParams.set("token", raw);
+            resetUrl = parsed;
+          }
+        } catch {
+          // Do not email a relative or malformed recovery URL.
+        }
+        if (!resetUrl) {
+          console.error("[auth] password recovery link not sent: AUTH_PUBLIC_URL must be a valid HTTPS app URL");
+        } else {
+          await sendAuthEmail(
+            email,
+            "Reset your Geminio OS password",
+            "<p>We received a request to reset your Geminio OS password.</p><p><a href=\"" +
+              resetUrl.toString() +
+              "\">Reset your password</a></p><p>This link expires in 15 minutes and can only be used once. If you did not request this, you can ignore this email.</p>",
+          );
+        }
       }
     } catch(e) { console.error("[auth] recovery request failed",e); }
     return res.status(202).json({ok:true,message:"If an account exists for that address, password reset instructions will be sent."});
