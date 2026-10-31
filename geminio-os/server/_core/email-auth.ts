@@ -165,11 +165,30 @@ export function registerEmailAuthRoutes(app: Express) {
     const password=typeof req.body?.password==="string"?req.body.password:"";
     if(raw.length<30 || password.length<10 || password.length>128) return jsonError(res,400,"The reset link or new password is invalid.");
     try {
-      const [rows]=await pool.execute<mysql.RowDataPacket[]>("SELECT id,userId FROM auth_action_tokens WHERE tokenHash=? AND purpose='reset' AND consumedAt IS NULL AND expiresAt>NOW() LIMIT 1",[hash(raw)]);
-      const item=rows[0]; if(!item) return jsonError(res,400,"The reset link is invalid or expired.");
-      const digest=await passwordHash(password);
-      await pool.execute("UPDATE auth_action_tokens SET consumedAt=NOW() WHERE id=? AND consumedAt IS NULL",[item.id]);
-      await pool.execute("UPDATE auth_credentials SET passwordHash=? WHERE userId=?",[digest,item.userId]);
+      const connection = await pool.getConnection();
+      try {
+        await connection.beginTransaction();
+        const [rows] = await connection.execute<mysql.RowDataPacket[]>("SELECT id,userId FROM auth_action_tokens WHERE tokenHash=? AND purpose='reset' AND consumedAt IS NULL AND expiresAt>NOW() LIMIT 1 FOR UPDATE",[hash(raw)]);
+        const item = rows[0];
+        if (!item) {
+          await connection.rollback();
+          return jsonError(res,400,"The reset link is invalid or expired.");
+        }
+        const digest = await passwordHash(password);
+        const [consumed] = await connection.execute<mysql.ResultSetHeader>("UPDATE auth_action_tokens SET consumedAt=NOW() WHERE id=? AND consumedAt IS NULL AND expiresAt>NOW()",[item.id]);
+        if (consumed.affectedRows !== 1) {
+          await connection.rollback();
+          return jsonError(res,400,"The reset link is invalid, expired, or already used.");
+        }
+        await connection.execute("UPDATE auth_credentials SET passwordHash=? WHERE userId=?",[digest,item.userId]);
+        await connection.execute("UPDATE auth_action_tokens SET consumedAt=NOW() WHERE userId=? AND purpose='reset' AND consumedAt IS NULL",[item.userId]);
+        await connection.commit();
+      } catch (error) {
+        await connection.rollback();
+        throw error;
+      } finally {
+        connection.release();
+      }
       return res.json({ok:true,message:"Password updated. Sign in with your new password."});
     } catch(e) { console.error("[auth] password reset failed",e); return jsonError(res,503,"Password reset is temporarily unavailable."); }
   });
