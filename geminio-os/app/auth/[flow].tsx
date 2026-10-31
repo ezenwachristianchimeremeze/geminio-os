@@ -26,7 +26,7 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default function AuthFlowScreen() {
   const colors = useColors();
   const router = useRouter();
-  const params = useLocalSearchParams<{ flow?: string; token?: string }>();
+  const params = useLocalSearchParams<{ flow?: string; token?: string; email?: string }>();
   const raw = typeof params.flow === "string" ? params.flow : "sign-in";
   const flow = (raw in definitions ? raw : "sign-in") as Flow;
   const details = useMemo(() => definitions[flow], [flow]);
