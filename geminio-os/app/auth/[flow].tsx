@@ -107,7 +107,7 @@ export default function AuthFlowScreen() {
                     placeholderTextColor={colors.muted}
                     secureTextEntry={field.secure && !visiblePasswords[field.key]}
                     keyboardType={field.email ? "email-address" : field.keyboard ?? "default"}
-                    autoCapitalize={field.email ? "none" : "words"}
+                    autoCapitalize={field.email || field.secure || field.keyboard === "number-pad" ? "none" : "words"}
                     autoCorrect={false}
                     textContentType={field.key === "password" ? "newPassword" : field.email ? "emailAddress" : "none"}
                     style={[styles.input, { color: colors.foreground }]}
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   backText: { fontSize: 14, fontWeight: "700" },
   brand: { alignItems: "center", marginTop: 12, marginBottom: 30 },
   eyebrow: { fontSize: 10, fontWeight: "900", letterSpacing: 2, marginBottom: 9 },
-  title: { fontSize: 30, lineHeight: 36, fontWeight: "850", letterSpacing: -0.8 },
+  title: { fontSize: 30, lineHeight: 36, fontWeight: "800", letterSpacing: -0.8 },
   description: { fontSize: 14, lineHeight: 21, marginTop: 9, marginBottom: 24 },
   card: { borderWidth: 1, borderRadius: 22, padding: 18, gap: 17 },
   field: { gap: 8 },
