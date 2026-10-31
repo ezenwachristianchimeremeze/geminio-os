@@ -1,6 +1,7 @@
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import type { Express, Request, Response } from "express";
 import { randomBytes, timingSafeEqual } from "node:crypto";
+import { parse as parseCookieHeader } from "cookie";
 import { COOKIE_NAME, ONE_YEAR_MS } from "../../shared/const.js";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
@@ -48,7 +49,7 @@ export function registerGoogleAuthRoutes(app: Express) {
   app.get("/api/auth/callback", async (req: Request, res: Response) => {
     const state = typeof req.query.state === "string" ? req.query.state : "";
     const code = typeof req.query.code === "string" ? req.query.code : "";
-    const savedState = req.cookies?.[STATE_COOKIE] || "";
+    const savedState = parseCookieHeader(req.headers.cookie || "")[STATE_COOKIE] || "";
     res.clearCookie(STATE_COOKIE, stateCookieOptions(req));
     if (!code || !state || !savedState || !safeEqual(state, savedState)) {
       res.status(400).json({ ok: false, error: "Google sign-in state is invalid or expired. Please try again." });
