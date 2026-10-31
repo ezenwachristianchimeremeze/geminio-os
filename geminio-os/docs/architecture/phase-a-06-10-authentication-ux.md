@@ -22,13 +22,13 @@ Status: UI and interaction foundation implemented; live email/password, email ve
 
 ## Screen and navigation contract
 
-### 6. Welcome → account entry
-- `Get started` pushes `/auth/sign-up`.
+### 6. Sign-up
+- The welcome screen's `Get started` button pushes `/auth/sign-up`.
 - `I already have an account` pushes `/auth/sign-in`.
 - Back from account screens returns to the welcome screen.
 - The welcome screen does not create a session.
 
-### 7. Sign-up
+
 Fields: full name, email, password, confirm password, consent checkbox.
 - Validate required fields, email format, minimum password length (8), password equality, and explicit consent.
 - Show/hide password controls are independent per password field.
@@ -37,14 +37,14 @@ Fields: full name, email, password, confirm password, consent checkbox.
 - Current implementation intentionally does not transmit or persist credentials because no email/password registration endpoint exists in the repository.
 - Expected successful server response: route to `/auth/verify-email` with an opaque challenge identifier, never a raw verification secret.
 
-### 8. OAuth
+### 7. Google and supported OAuth
 - Existing repository contains OAuth callback and mobile code-exchange handlers.
 - A provider authorization-start route/provider configuration was not found in the inspected server implementation.
 - Do not display a provider as available until the authorization-start endpoint, redirect URI allowlist, state/PKCE handling, and provider configuration are implemented.
 - After callback, validate state, exchange code server-side, persist session securely, fetch the authenticated user, then route to the next required step.
 - Cancelled or failed provider flows return to sign-in with a recoverable message.
 
-### 9. Email verification
+### 8. Email verification
 Fields: six-digit numeric code.
 - Validate exactly six digits before request.
 - Verify button submits to a future server verification endpoint.
@@ -53,14 +53,14 @@ Fields: six-digit numeric code.
 - Success must be based on server confirmation, then route to the configured post-verification onboarding step.
 - Current UI validates locally but clearly reports that the verification endpoint is not yet connected.
 
-### 10. Forgot password
+### 9. Forgot password
 Field: email address.
 - Validate email format locally.
 - Future server endpoint must return a generic confirmation for both existing and non-existing accounts to prevent account enumeration.
 - Server must generate a short-lived, single-use, hashed reset token and deliver a link through a configured email provider.
 - Do not reveal whether an account exists.
-- Reset-password completion is a separate screen/step and is not implied by the request screen.
-- Current UI clearly reports that recovery delivery is not connected; it does not claim an email was sent.
+- Reset-password completion is a separate screen at `/auth/reset-password` and is not implied by the request screen.
+- The reset screen collects and validates a new password and confirmation, but clearly reports that the server token-validation endpoint is not connected; it does not claim the password changed.
 
 ## Interaction states
 - Default: neutral border and muted placeholder.
@@ -70,6 +70,13 @@ Field: email address.
 - Validation error: inline message within the form card; preserve entered values.
 - Server error: safe, human-readable message; do not expose stack traces or provider secrets.
 - Success: only show after a trusted server response.
+
+### 10. Reset password
+- Collect new password and confirmation; require minimum length and matching values.
+- Accept reset token only through a validated, short-lived link/deep-link flow.
+- Submit token and new password to a future server endpoint.
+- On server confirmation, invalidate all prior sessions and route to sign-in with a success notice.
+- Current UI validates the new password locally but clearly reports that server-side token validation and password update are not connected.
 
 ## Backend contracts required before production
 1. `POST /api/auth/register`: validate input, hash password using a modern password-hashing algorithm, create pending account and verification challenge in a transaction, send email, return challenge metadata.
