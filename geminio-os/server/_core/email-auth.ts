@@ -53,15 +53,29 @@ export function registerEmailAuthRoutes(app: Express) {
     const password = typeof req.body?.password === "string" ? req.body.password : "";
     if (name.length < 2 || name.length > 120 || !emailPattern.test(email) || password.length < 10 || password.length > 128 || req.body?.acceptedTerms !== true) return jsonError(res,400,"Check your name, email, password (at least 10 characters), and consent.");
     try {
-      const [existing] = await pool.execute<mysql.RowDataPacket[]>("SELECT id FROM auth_credentials WHERE email=? LIMIT 1",[email]);
-      if (existing.length) return res.status(202).json({ok:true,message:"If this address can be registered, a verification email will be sent."});
-      const openId = "local_" + randomBytes(18).toString("hex");
-      const [userResult] = await pool.execute<mysql.ResultSetHeader>("INSERT INTO users (openId,name,email,loginMethod,role,lastSignedIn) VALUES (?,?,?,'email','user',NOW())",[openId,name,email]);
-      const userId = userResult.insertId;
-      const digest = await passwordHash(password);
-      await pool.execute("INSERT INTO auth_credentials (userId,email,passwordHash,emailVerified) VALUES (?,?,?,0)",[userId,email,digest]);
-      const code = randomBytes(4).toString("hex").slice(0,6).toUpperCase();
-      await pool.execute("INSERT INTO auth_action_tokens (tokenHash,userId,purpose,expiresAt) VALUES (?,?, 'verify', DATE_ADD(NOW(), INTERVAL 30 MINUTE))",[hash(code),userId]);
+      const connection = await pool.getConnection();
+      let code = "";
+      try {
+        await connection.beginTransaction();
+        const [existing] = await connection.execute<mysql.RowDataPacket[]>("SELECT id FROM auth_credentials WHERE email=? LIMIT 1 FOR UPDATE",[email]);
+        if (existing.length) {
+          await connection.rollback();
+          return res.status(202).json({ok:true,message:"If this address can be registered, a verification email will be sent."});
+        }
+        const openId = "local_" + randomBytes(18).toString("hex");
+        const [userResult] = await connection.execute<mysql.ResultSetHeader>("INSERT INTO users (openId,name,email,loginMethod,role,lastSignedIn) VALUES (?,?,?,'email','user',NOW())",[openId,name,email]);
+        const userId = userResult.insertId;
+        const digest = await passwordHash(password);
+        await connection.execute("INSERT INTO auth_credentials (userId,email,passwordHash,emailVerified) VALUES (?,?,?,0)",[userId,email,digest]);
+        code = randomBytes(4).toString("hex").slice(0,6).toUpperCase();
+        await connection.execute("INSERT INTO auth_action_tokens (tokenHash,userId,purpose,expiresAt) VALUES (?,?, 'verify', DATE_ADD(NOW(), INTERVAL 30 MINUTE))",[hash(code),userId]);
+        await connection.commit();
+      } catch (error) {
+        await connection.rollback();
+        throw error;
+      } finally {
+        connection.release();
+      }
       try { await sendAuthEmail(email,"Verify your Geminio OS email","<p>Your verification code is:</p><h1 style='letter-spacing:8px'>"+code+"</h1><p>It expires in 30 minutes.</p>"); }
       catch { return res.status(202).json({ok:true,message:"Your account was created. Email delivery is temporarily unavailable; request a new verification code when email is configured."}); }
       return res.status(201).json({ok:true,message:"Account created. Check your email for the verification code.",requiresVerification:true});
