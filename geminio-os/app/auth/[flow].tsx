@@ -13,8 +13,8 @@ const definitions: Record<Flow, { eyebrow: string; title: string; description: s
   "sign-up": { eyebrow: "CREATE YOUR ACCOUNT", title: "Join Geminio OS", description: "One account for your connected intelligent workspace.", fields: [{ key: "name", label: "Full name", placeholder: "Your full name" }, { key: "email", label: "Email address", placeholder: "you@example.com", email: true }, { key: "password", label: "Create password", placeholder: "At least 10 characters", secure: true }, { key: "confirmPassword", label: "Confirm password", placeholder: "Enter password again", secure: true }], action: "Create account" },
   recovery: { eyebrow: "ACCOUNT RECOVERY", title: "Forgot your password?", description: "Enter the email address associated with your account.", fields: [{ key: "email", label: "Email address", placeholder: "you@example.com", email: true }], action: "Send recovery link" },
   "forgot-password": { eyebrow: "ACCOUNT RECOVERY", title: "Forgot your password?", description: "Enter the email address associated with your account.", fields: [{ key: "email", label: "Email address", placeholder: "you@example.com", email: true }], action: "Send recovery link" },
-  "reset-password": { eyebrow: "SECURE YOUR ACCOUNT", title: "Create a new password", description: "Choose a new password for your Geminio OS account.", fields: [{ key: "password", label: "New password", placeholder: "At least 8 characters", secure: true }, { key: "confirmPassword", label: "Confirm new password", placeholder: "Enter password again", secure: true }], action: "Update password" },
-  "verify-email": { eyebrow: "VERIFY YOUR EMAIL", title: "Check your inbox", description: "Enter the verification code sent to your email address.", fields: [{ key: "code", label: "6-digit verification code", placeholder: "000000", keyboard: "number-pad" }], action: "Verify email" },
+  "reset-password": { eyebrow: "SECURE YOUR ACCOUNT", title: "Create a new password", description: "Choose a new password for your Geminio OS account.", fields: [{ key: "password", label: "New password", placeholder: "At least 10 characters", secure: true }, { key: "confirmPassword", label: "Confirm new password", placeholder: "Enter password again", secure: true }], action: "Update password" },
+  "verify-email": { eyebrow: "VERIFY YOUR EMAIL", title: "Check your inbox", description: "Enter the verification code sent to your email address.", fields: [{ key: "code", label: "6-character verification code", placeholder: "000000", keyboard: "number-pad" }], action: "Verify email" },
   oauth: { eyebrow: "SECURE PROVIDER SIGN-IN", title: "Continue with a provider", description: "Geminio OS will use only an OAuth provider configured by the platform administrator.", fields: [], action: "Continue" },
   mfa: { eyebrow: "ACCOUNT SECURITY", title: "Verify your identity", description: "Enter the one-time code from your configured authenticator.", fields: [{ key: "code", label: "Verification code", placeholder: "Enter code", keyboard: "number-pad" }], action: "Verify code" },
   "link-account": { eyebrow: "CONNECTED IDENTITY", title: "Link an account", description: "Provider linking becomes available when an approved identity provider is configured.", fields: [], action: "Review provider" },
@@ -49,11 +49,11 @@ export default function AuthFlowScreen() {
       if (field.email && !emailPattern.test(value)) return "Enter a valid email address.";
     }
     if (flow === "sign-up" || flow === "reset-password") {
-      if ((values.password ?? "").length < 8) return "Use a password with at least 8 characters.";
+      if ((values.password ?? "").length < 10) return "Use a password with at least 10 characters.";
       if (values.password !== values.confirmPassword) return "Your passwords do not match.";
     }
     if (flow === "sign-up" && !acceptedTerms) return "Please accept the Terms and Privacy Notice to continue.";
-    if (flow === "verify-email" && !/^\d{6}$/.test(values.code ?? "")) return "Enter the 6-digit verification code.";
+    if (flow === "verify-email" && !/^[A-Z0-9]{6}$/.test((values.code ?? "").toUpperCase())) return "Enter the 6-character verification code.";
     return "";
   };
 
@@ -117,7 +117,7 @@ export default function AuthFlowScreen() {
                 <View style={[styles.inputWrap, { backgroundColor: colors.background, borderColor: colors.border }]}>
                   <TextInput
                     value={values[field.key] ?? ""}
-                    onChangeText={(value) => setValue(field.key, field.keyboard === "number-pad" ? value.replace(/\D/g, "").slice(0, 6) : value)}
+                    onChangeText={(value) => setValue(field.key, field.keyboard === "number-pad" ? value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 6) : value)}
                     placeholder={field.placeholder}
                     placeholderTextColor={colors.muted}
                     secureTextEntry={field.secure && !visiblePasswords[field.key]}
