@@ -39,16 +39,6 @@ async function sendAuthEmail(to: string, subject: string, html: string) {
   const response = await fetch("https://api.resend.com/emails", { method:"POST", headers:{ Authorization:"Bearer "+key, "Content-Type":"application/json" }, body:JSON.stringify({ from, to:[to], subject, html }) });
   if (!response.ok) { const body = await response.text(); console.error("[auth-email] provider rejected message", response.status, body.slice(0,300)); throw new Error("Email delivery failed"); }
 }
-async function issueToken(userId: number, purpose: "verify"|"reset", email: string) {
-  const raw = token(); const expires = new Date(Date.now() + (purpose === "verify" ? 30 : 15) * 60_000);
-  await pool.execute("INSERT INTO auth_action_tokens (tokenHash,userId,purpose,expiresAt) VALUES (?,?,?,?)", [hash(raw),userId,purpose,expires]);
-  const base = (process.env.AUTH_PUBLIC_URL || process.env.EXPO_PUBLIC_APP_URL || "").replace(/\/$/,"");
-  const link = purpose === "reset" ? base + "/auth/reset-password?token=" + encodeURIComponent(raw) : "";
-  const content = purpose === "verify"
-    ? "<p>Use this Geminio OS verification code:</p><h1 style='letter-spacing:8px'>" + raw.slice(0,6).toUpperCase() + "</h1><p>This code expires in 30 minutes.</p>"
-    : "<p>Reset your Geminio OS password using this secure link:</p><p><a href='" + link + "'>Reset password</a></p><p>This link expires in 15 minutes.</p>";
-  await sendAuthEmail(email, purpose === "verify" ? "Verify your Geminio OS email" : "Reset your Geminio OS password", content);
-}
 async function createSession(res: Response, req: Request, openId: string, name: string) {
   const jwt = await sdk.createSessionToken(openId,{ name, expiresInMs: ONE_YEAR_MS });
   const options = getSessionCookieOptions(req);
@@ -70,7 +60,7 @@ export function registerEmailAuthRoutes(app: Express) {
       const userId = userResult.insertId;
       const digest = await passwordHash(password);
       await pool.execute("INSERT INTO auth_credentials (userId,email,passwordHash,emailVerified) VALUES (?,?,?,0)",[userId,email,digest]);
-      const raw = token(); const code = raw.slice(0,6).toUpperCase();
+      const code = randomBytes(4).toString("hex").slice(0,6).toUpperCase();
       await pool.execute("INSERT INTO auth_action_tokens (tokenHash,userId,purpose,expiresAt) VALUES (?,?, 'verify', DATE_ADD(NOW(), INTERVAL 30 MINUTE))",[hash(code),userId]);
       try { await sendAuthEmail(email,"Verify your Geminio OS email","<p>Your verification code is:</p><h1 style='letter-spacing:8px'>"+code+"</h1><p>It expires in 30 minutes.</p>"); }
       catch { return res.status(202).json({ok:true,message:"Your account was created. Email delivery is temporarily unavailable; request a new verification code when email is configured."}); }
