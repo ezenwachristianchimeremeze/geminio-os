@@ -77,7 +77,7 @@ export default function AuthFlowScreen() {
         await request("/api/auth/sign-in", { email: values.email, password: values.password });
         router.replace("/(tabs)");
       } else if (flow === "verify-email") {
-        await request("/api/auth/email/verify", { email: params.email, code: values.code });
+        await request("/api/auth/email/verify", { email: typeof params.email === "string" ? params.email : "", code: values.code });
         Alert.alert("Email verified", "Your account is now verified.");
         router.replace("/(tabs)");
       } else if (flow === "forgot-password" || flow === "recovery") {
@@ -153,6 +153,23 @@ export default function AuthFlowScreen() {
               <Text style={[styles.buttonArrow, { color: colors.primaryForeground }]}>→</Text>
             </Pressable>
 
+            {flow === "verify-email" ? (
+              <Pressable accessibilityRole="button" onPress={async () => {
+                const email = typeof params.email === "string" ? params.email : "";
+                if (!email) { setError("Return to sign-up and enter your email address."); return; }
+                setBusy(true); setError("");
+                try {
+                  const base = (process.env.EXPO_PUBLIC_API_URL || "").replace(/\\/$/, "");
+                  const response = await fetch(base + "/api/auth/email/resend", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ email }) });
+                  const data = await response.json().catch(() => ({}));
+                  if (!response.ok) throw new Error(data.error || "Could not request another code.");
+                  Alert.alert("Request received", data.message || "If verification is pending, a new code will be sent.");
+                } catch (e) { setError(e instanceof Error ? e.message : "Could not resend the code."); }
+                finally { setBusy(false); }
+              }} style={styles.linkButton}>
+                <Text style={[styles.linkText, { color: colors.primary }]}>Resend verification code</Text>
+              </Pressable>
+            ) : null}
             {flow === "sign-up" ? (
               <Pressable onPress={() => router.push({ pathname: "/auth/[flow]", params: { flow: "oauth" } })} style={[styles.providerButton, { borderColor: colors.border }]}>
                 <Text style={[styles.providerText, { color: colors.foreground }]}>Continue with a configured provider</Text>
