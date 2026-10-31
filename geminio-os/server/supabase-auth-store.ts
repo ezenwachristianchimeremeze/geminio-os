@@ -1,4 +1,4 @@
-import type { InsertUser, User } from "../drizzle/schema";
+import type { User } from "../drizzle/schema";
 
 type GoogleUserInput = { openId: string; email: string; name: string };
 function supabaseConfig() {
