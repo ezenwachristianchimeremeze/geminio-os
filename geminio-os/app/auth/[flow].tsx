@@ -46,11 +46,11 @@ export default function AuthFlowScreen() {
       if (!value) return `${field.label} is required.`;
       if (field.email && !emailPattern.test(value)) return "Enter a valid email address.";
     }
-    if (flow === "sign-up") {
+    if (flow === "sign-up" || flow === "reset-password") {
       if ((values.password ?? "").length < 8) return "Use a password with at least 8 characters.";
       if (values.password !== values.confirmPassword) return "Your passwords do not match.";
-      if (!acceptedTerms) return "Please accept the Terms and Privacy Notice to continue.";
     }
+    if (flow === "sign-up" && !acceptedTerms) return "Please accept the Terms and Privacy Notice to continue.";
     if (flow === "verify-email" && !/^\d{6}$/.test(values.code ?? "")) return "Enter the 6-digit verification code.";
     return "";
   };
