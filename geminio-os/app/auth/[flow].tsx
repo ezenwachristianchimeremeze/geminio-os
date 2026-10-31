@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect } from "react";
 import { useMemo, useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
@@ -9,7 +10,7 @@ type Flow = "sign-in" | "sign-up" | "recovery" | "forgot-password" | "reset-pass
 type Field = { key: string; label: string; placeholder: string; secure?: boolean; email?: boolean; keyboard?: "default" | "email-address" | "number-pad" };
 const definitions: Record<Flow, { eyebrow: string; title: string; description: string; fields: Field[]; action: string }> = {
   "sign-in": { eyebrow: "WELCOME BACK", title: "Sign in", description: "Continue to your Geminio OS workspace.", fields: [{ key: "email", label: "Email address", placeholder: "you@example.com", email: true }, { key: "password", label: "Password", placeholder: "Enter your password", secure: true }], action: "Sign in securely" },
-  "sign-up": { eyebrow: "CREATE YOUR ACCOUNT", title: "Join Geminio OS", description: "One account for your connected intelligent workspace.", fields: [{ key: "name", label: "Full name", placeholder: "Your full name" }, { key: "email", label: "Email address", placeholder: "you@example.com", email: true }, { key: "password", label: "Create password", placeholder: "At least 8 characters", secure: true }, { key: "confirmPassword", label: "Confirm password", placeholder: "Enter password again", secure: true }], action: "Create account" },
+  "sign-up": { eyebrow: "CREATE YOUR ACCOUNT", title: "Join Geminio OS", description: "One account for your connected intelligent workspace.", fields: [{ key: "name", label: "Full name", placeholder: "Your full name" }, { key: "email", label: "Email address", placeholder: "you@example.com", email: true }, { key: "password", label: "Create password", placeholder: "At least 10 characters", secure: true }, { key: "confirmPassword", label: "Confirm password", placeholder: "Enter password again", secure: true }], action: "Create account" },
   recovery: { eyebrow: "ACCOUNT RECOVERY", title: "Forgot your password?", description: "Enter the email address associated with your account.", fields: [{ key: "email", label: "Email address", placeholder: "you@example.com", email: true }], action: "Send recovery link" },
   "forgot-password": { eyebrow: "ACCOUNT RECOVERY", title: "Forgot your password?", description: "Enter the email address associated with your account.", fields: [{ key: "email", label: "Email address", placeholder: "you@example.com", email: true }], action: "Send recovery link" },
   "reset-password": { eyebrow: "SECURE YOUR ACCOUNT", title: "Create a new password", description: "Choose a new password for your Geminio OS account.", fields: [{ key: "password", label: "New password", placeholder: "At least 8 characters", secure: true }, { key: "confirmPassword", label: "Confirm new password", placeholder: "Enter password again", secure: true }], action: "Update password" },
@@ -25,7 +26,7 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default function AuthFlowScreen() {
   const colors = useColors();
   const router = useRouter();
-  const params = useLocalSearchParams<{ flow?: string }>();
+  const params = useLocalSearchParams<{ flow?: string; token?: string }>();
   const raw = typeof params.flow === "string" ? params.flow : "sign-in";
   const flow = (raw in definitions ? raw : "sign-in") as Flow;
   const details = useMemo(() => definitions[flow], [flow]);
@@ -34,6 +35,7 @@ export default function AuthFlowScreen() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  useEffect(() => { if (typeof params.token === "string") setValues((v) => ({ ...v, token: params.token! })); }, [params.token]);
 
   const setValue = (key: string, value: string) => {
     setValues((current) => ({ ...current, [key]: value }));
@@ -43,7 +45,7 @@ export default function AuthFlowScreen() {
   const validate = () => {
     for (const field of details.fields) {
       const value = values[field.key]?.trim() ?? "";
-      if (!value) return `${field.label} is required.`;
+      if (!value && !(flow === "verify-email" && field.key === "code")) return `${field.label} is required.`;
       if (field.email && !emailPattern.test(value)) return "Enter a valid email address.";
     }
     if (flow === "sign-up" || flow === "reset-password") {
@@ -55,29 +57,41 @@ export default function AuthFlowScreen() {
     return "";
   };
 
-  const submit = () => {
+  const submit = async () => {
     const validation = validate();
-    if (validation) {
-      setError(validation);
-      return;
-    }
-    if (flow === "sign-up") {
-      setError("Account creation is not connected yet. The current backend has no email/password registration endpoint. Your details have not been sent or saved.");
-      return;
-    }
-    if (flow === "sign-in") {
-      setError("Password sign-in is not connected yet. Use the configured OAuth sign-in flow when it is enabled. No sign-in was attempted.");
-      return;
-    }
-    if (flow === "forgot-password" || flow === "recovery") {
-      setError("Password recovery is not connected yet. The backend needs a secure recovery-token and email-delivery endpoint. No email was sent.");
-      return;
-    }
-    if (flow === "verify-email") {
-      setError("Email verification is not connected yet. The backend needs a one-time-code verification endpoint. Your code was not submitted.");
-      return;
-    }
-    setError("This action is not available until its identity provider and server endpoint are configured.");
+    if (validation) { setError(validation); return; }
+    const apiBase = (process.env.EXPO_PUBLIC_API_URL || "").replace(/\\/$/, "");
+    const request = async (path: string, body: Record<string, unknown>) => {
+      const response = await fetch(apiBase + path, { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(body) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.ok === false) throw new Error(data.error || "The request could not be completed.");
+      return data;
+    };
+    setBusy(true); setError("");
+    try {
+      if (flow === "sign-up") {
+        const result = await request("/api/auth/register", { name: values.name, email: values.email, password: values.password, acceptedTerms });
+        Alert.alert("Check your email", result.message || "If registration was accepted, check your inbox for a verification code.");
+        router.replace({ pathname: "/auth/[flow]", params: { flow: "verify-email", email: values.email } });
+      } else if (flow === "sign-in") {
+        await request("/api/auth/sign-in", { email: values.email, password: values.password });
+        router.replace("/(tabs)");
+      } else if (flow === "verify-email") {
+        await request("/api/auth/email/verify", { email: params.email, code: values.code });
+        Alert.alert("Email verified", "Your account is now verified.");
+        router.replace("/(tabs)");
+      } else if (flow === "forgot-password" || flow === "recovery") {
+        const result = await request("/api/auth/password/forgot", { email: values.email });
+        Alert.alert("Check your inbox", result.message);
+      } else if (flow === "reset-password") {
+        await request("/api/auth/password/reset", { token: params.token || values.token, password: values.password });
+        Alert.alert("Password updated", "Sign in with your new password.");
+        router.replace({ pathname: "/auth/[flow]", params: { flow: "sign-in" } });
+      } else {
+        throw new Error("This identity provider flow is not configured yet.");
+      }
+    } catch (e) { setError(e instanceof Error ? e.message : "Authentication failed. Please try again."); }
+    finally { setBusy(false); }
   };
 
   const titleColor = colors.foreground;
