@@ -16,7 +16,7 @@ function PlanPreviewCard({ h, c }: { h: ReturnType<typeof useHomeChat>; c: Retur
   if (!p.data.ok) {
     return (
       <View accessibilityRole="alert" accessibilityLabel="Plan problem" style={[styles.progress, { borderColor: c.error, backgroundColor: c.surface, gap: 6 }]}>
-        <Text style={{ color: c.errorText, fontWeight: "700" }}>That plan isn't allowed</Text>
+        <Text style={{ color: c.errorText, fontWeight: "700" }}>That plan isn&apos;t allowed</Text>
         {p.data.problems.map((x) => <Text key={x} style={{ color: c.errorText, fontSize: 13 }}>• {x}</Text>)}
         <View style={{ flexDirection: "row", gap: 8 }}>
           <Pressable accessibilityRole="button" onPress={() => h.editPlan([])} style={[styles.approve, { backgroundColor: c.surfaceMuted }]}><Text style={{ color: c.foreground }}>Reset to default</Text></Pressable>
@@ -132,14 +132,14 @@ export default function HomeScreen() {
       {header}
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <View style={{ flex: 1, width: "100%", maxWidth: 860, alignSelf: "center" }}>
-          {h.conversationError ? <View accessibilityRole="alert" style={[styles.banner, { borderColor: c.error }]}><Text style={{ color: c.errorText }}>⚠ Couldn't load this conversation: {h.conversationError}</Text></View> : null}
+          {h.conversationError ? <View accessibilityRole="alert" style={[styles.banner, { borderColor: c.error }]}><Text style={{ color: c.errorText }}>⚠ Couldn&apos;t load this conversation: {h.conversationError}</Text></View> : null}
           {h.notice ? <View accessibilityLiveRegion="polite" style={[styles.toast, { backgroundColor: c.foreground }]}><Text style={{ color: c.background, fontSize: 13 }}>{h.notice}</Text></View> : null}
           {h.loadingConversation ? <ActivityIndicator style={{ marginTop: 24 }} color={c.primaryText} /> : null}
 
           {empty ? (
             <View style={styles.empty}>
               <Text accessibilityRole="header" style={{ color: c.foreground, fontSize: 26, fontWeight: "800", textAlign: "center" }}>What can I help you with?</Text>
-              <Text style={{ color: c.muted, textAlign: "center", fontSize: 15 }}>Ask anything, attach a file, or use your voice. I'll route it to the right Geminio tool.</Text>
+              <Text style={{ color: c.muted, textAlign: "center", fontSize: 15 }}>Ask anything, attach a file, or use your voice. I&apos;ll route it to the right Geminio tool.</Text>
               <View style={styles.chips}>{SUGGESTIONS.map((s) => <Pressable key={s} accessibilityRole="button" onPress={() => sendSuggestion(s)} style={[styles.chip, { borderColor: c.border, backgroundColor: c.surface }]}><Text style={{ color: c.foreground }}>{s}</Text></Pressable>)}</View>
             </View>
           ) : (
@@ -166,7 +166,7 @@ export default function HomeScreen() {
                       <Text style={{ color: c.muted, fontSize: 12, marginTop: 4 }}>Generating… (updates every moment; stop any time)</Text>
                     </View>
                   ) : null}
-                  {h.searchReport.attempted && h.searchReport.status !== "ok" ? <View accessibilityRole="alert" style={[styles.banner, { borderColor: c.warning, backgroundColor: c.surface }]}><Text style={{ color: c.warningText, fontSize: 13 }}>🌐 Web search {h.searchReport.status === "unavailable" ? "isn't available" : "failed"}: {h.searchReport.reason}. This answer isn't based on live web results.</Text></View> : null}
+                  {h.searchReport.attempted && h.searchReport.status !== "ok" ? <View accessibilityRole="alert" style={[styles.banner, { borderColor: c.warning, backgroundColor: c.surface }]}><Text style={{ color: c.warningText, fontSize: 13 }}>🌐 Web search {h.searchReport.status === "unavailable" ? "isn&apos;t available" : "failed"}: {h.searchReport.reason}. This answer isn't based on live web results.</Text></View> : null}
                   {h.turn.s === "running" && h.turn.steps.length > 0 ? (
                     <View accessibilityLabel="Task progress" style={[styles.progress, { borderColor: c.border, backgroundColor: c.surface }]}>
                       {h.turn.steps.map((s) => <Text key={s.key} style={{ color: s.state === "active" ? c.primaryText : s.state === "failed" ? c.errorText : c.muted, fontSize: 13 }}>{s.state === "done" ? "✓" : s.state === "active" ? "●" : "✕"} {s.label}</Text>)}
