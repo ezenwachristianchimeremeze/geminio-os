@@ -131,7 +131,7 @@ export default function HomeScreen() {
       {header}
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <View style={{ flex: 1, width: "100%", maxWidth: 860, alignSelf: "center" }}>
-          {h.conversationError ? <View accessibilityRole="alert" style={[styles.banner, { borderColor: c.error }]}><Text style={{ color: c.errorText }}>⚠ Couldn&apos;t load this conversation: {h.conversationError.message}</Text></View> : null}
+          {h.conversationError ? <View accessibilityRole="alert" style={[styles.banner, { borderColor: c.error }]}><Text style={{ color: c.errorText }}>⚠ Couldn&apos;t load this conversation: {h.conversationError}</Text></View> : null}
           {h.notice ? <View accessibilityLiveRegion="polite" style={[styles.toast, { backgroundColor: c.foreground }]}><Text style={{ color: c.background, fontSize: 13 }}>{h.notice}</Text></View> : null}
           {h.loadingConversation ? <ActivityIndicator style={{ marginTop: 24 }} color={c.primaryText} /> : null}
 
@@ -146,7 +146,7 @@ export default function HomeScreen() {
               ref={listRef} data={data} keyExtractor={(m) => m.id} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingVertical: 8 }}
               renderItem={({ item }) => (
                 <MessageBubble
-                  message={item} variants={h.variantsFor(item.id)} onSelectVariant={(id) => void h.selectVariant(id)} isLastAssistant={item.id === h.lastAssistantId} speech={h.speech} canPauseSpeech={h.canPauseSpeech}
+                  message={item} busy={h.busy} variants={h.variantsFor(item.id)} onSelectVariant={(id) => void h.selectVariant(id)} isLastAssistant={item.id === h.lastAssistantId} speech={h.speech} canPauseSpeech={h.canPauseSpeech}
                   onCopy={(t, l) => void h.copy(t, l)} onSpeak={(id, t) => h.speak(id, t)} onPause={h.pauseSpeech} onResume={h.resumeSpeech} onStopSpeech={h.stopSpeech}
                   onFeedback={(id, v) => void h.setFeedback(id, v)} onRetry={() => void h.retryLast()} onMore={setMore} onRunCode={(language, code) => setCodeRun({ language, code })} onEdit={(id, text) => void h.editMessage(id, text)}
                 />
@@ -158,14 +158,14 @@ export default function HomeScreen() {
                   {h.pendingUser && !messages.some((m) => m.role === "user" && m.content === h.pendingUser && h.turn.s !== "sending") ? (
                     <View style={{ alignItems: "flex-end" }}><View style={[styles.pending, { backgroundColor: c.primary }]}><Text style={{ color: c.primaryForeground, fontSize: 16 }}>{h.pendingUser}</Text></View></View>
                   ) : null}
-                  {h.lastContext ? <View accessibilityLabel="Context used" style={[styles.banner, { borderColor: c.border, backgroundColor: c.surface, marginHorizontal: 0 }]}><Text style={{ color: c.foreground }}>{h.lastContext}</Text></View> : null}
+                  {h.lastContext ? <View accessibilityLabel="Context used" style={[styles.banner, { borderColor: c.border, backgroundColor: c.surface, marginHorizontal: 0 }]}><Text style={{ color: c.foreground }}>{[h.lastContext.conversations.length ? `Conversations: ${h.lastContext.conversations.map((x) => `${x.title} (${x.messages} messages)`).join(", ")}` : "", h.lastContext.workspaceFiles.length ? `Workspace files: ${h.lastContext.workspaceFiles.map((x) => x.path).join(", ")}` : "", h.lastContext.secretFilesExcluded ? `Secret files excluded: ${h.lastContext.secretFilesExcluded}` : "", h.lastContext.omittedFiles ? `Additional files omitted: ${h.lastContext.omittedFiles}` : ""].filter(Boolean).join(" · ")}</Text></View> : null}
                   {h.streamingText ? (
                     <View accessibilityLiveRegion="polite" accessibilityLabel="Geminio is replying" style={[styles.pending, { backgroundColor: c.surface, borderColor: c.border, borderWidth: 1, marginHorizontal: 0 }]}>
                       <MessageContent markdown={h.streamingText} onCopyCode={(code) => void h.copy(code, "Code copied")} />
                       <Text style={{ color: c.muted, fontSize: 12, marginTop: 4 }}>Generating… (updates every moment; stop any time)</Text>
                     </View>
                   ) : null}
-                  {h.searchReport.attempted && h.searchReport.status !== "ok" ? <View accessibilityRole="alert" style={[styles.banner, { borderColor: c.warning, backgroundColor: c.surface }]}><Text style={{ color: c.warningText }}>{h.searchReport.message}</Text></View> : null}
+                  {h.searchReport.attempted && h.searchReport.status !== "ok" ? <View accessibilityRole="alert" style={[styles.banner, { borderColor: c.warning, backgroundColor: c.surface }]}><Text style={{ color: c.warningText }}>{h.searchReport.reason ?? (h.searchReport.status === "unavailable" ? "Web search is unavailable." : "Web search could not be completed.")}</Text></View> : null}
                   {h.turn.s === "running" && h.turn.steps.length > 0 ? (
                     <View accessibilityLabel="Task progress" style={[styles.progress, { borderColor: c.border, backgroundColor: c.surface }]}>
                       {h.turn.steps.map((s) => <Text key={s.key} style={{ color: s.state === "active" ? c.primaryText : s.state === "failed" ? c.errorText : c.muted, fontSize: 13 }}>{s.state === "active" ? "•" : "○"} {s.label}</Text>)}
@@ -196,7 +196,7 @@ export default function HomeScreen() {
             paused={h.turn.s === "paused"} canPause={h.turn.s === "running" && h.stepsTotal > 1} onPause={() => void h.pauseRun()} onResume={() => void h.resumeRun()}
             voice={h.voice} voiceElapsedMs={h.voiceElapsedMs} micAvailable={h.micAvailable} micSupported={h.micSupported}
             onMic={() => void h.startRecording()} onPauseRec={h.pauseRecording} onResumeRec={h.resumeRecording} onStopRec={() => void h.stopRecording()} onCancelRec={h.cancelRecording}
-            onAcceptTranscript={() => { const t = h.voice.s === "review" ? h.voice.text : ""; h.acceptTranscript(); if (voiceMode && t && h.voice.s === "review" && !h.voice.uncertain) void h.sendMessage(t); }}
+            onAcceptTranscript={() => { const t = h.voice.s === "review" ? h.voice.text : ""; h.acceptTranscript(); if (voiceMode && t && h.voice.s === "review" && !h.voice.uncertain) void h.sendMessage(t); }} onDismissVoice={h.dismissVoiceError}
             attachments={h.attachments} uploading={h.uploading} onAttachImage={() => void h.attach("image")} onAttachDoc={() => void h.attach("document")} onRemoveAttachment={h.removeAttachment}
             webMode={h.webMode} webSearchAvailable={h.config?.webSearch ?? false} onToggleWeb={() => h.setWebMode(h.webMode === "auto" ? "on" : h.webMode === "on" ? "off" : "auto")}
             planLabel={h.planType ? (h.planTypes.find((t) => t.id === h.planType)?.label ?? h.planType) : null}
