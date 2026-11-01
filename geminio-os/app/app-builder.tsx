@@ -51,7 +51,7 @@ const APP_DESIGNS_STORAGE_KEY = 'geminio.ai-builder.app-designs.v1';
 type BuildRun = {
   appId: string;
   runId: string;
-  status: 'accepted' | 'planning' | 'executing' | 'waiting_for_approval' | 'verifying' | 'completed' | 'failed' | 'cancelled';
+  status: 'accepted' | 'planning' | 'executing' | 'waiting_for_approval' | 'verifying' | 'paused' | 'completed' | 'failed' | 'cancelled';
 };
 
 function extractRunOutputText(result: unknown): string | null {

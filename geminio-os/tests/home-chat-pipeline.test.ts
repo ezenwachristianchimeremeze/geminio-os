@@ -270,6 +270,7 @@ describe("action preview", () => {
     const { buildPreview } = await import("../server/home-chat/pipeline");
     const p = buildPreview({ message: "  compare   databases ", plan: { type: "deep_research" }, webSearch: "off" }, {}, 2);
     expect(p).toMatchObject({ ok: true, understood: "compare databases", estimatedCredits: 3, usesWebSearch: false, canAfford: false });
+    if (!p.ok) throw new Error(p.problems.join("; "));
     expect(p.steps.map((s) => s.title)).toEqual(["Research", "Analysis", "Final answer"]);
     expect(buildPreview({ message: "hi", plan: null, webSearch: "off" }, {}, 5)).toMatchObject({ estimatedCredits: 1, canAfford: true });
     expect(buildPreview({ message: "latest news today", plan: { type: "deep_research" }, webSearch: "auto" }, {}, null)).toMatchObject({ estimatedCredits: 4, usesWebSearch: true, canAfford: null });

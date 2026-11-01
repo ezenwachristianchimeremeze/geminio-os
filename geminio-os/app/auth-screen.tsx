@@ -5,6 +5,7 @@ import { ScreenContainer } from '@/components/screen-container';
 import { useAuth } from '@/lib/auth-context';
 import { useColors } from '@/hooks/use-colors';
 import * as Haptics from 'expo-haptics';
+import { BrandMark } from '@/components/brand-mark';
 
 export default function AuthScreen() {
   const { authenticate, biometricsAvailable, authMethod } = useAuth();
@@ -75,9 +76,9 @@ export default function AuthScreen() {
         <View className="flex-1 justify-center items-center px-6 gap-8">
           {/* Header */}
           <View className="items-center gap-3">
-            <Text className="text-4xl font-bold text-foreground">Geminio OS</Text>
-            <Text className="text-base text-muted text-center">
-              Your Personal AI Operating System
+            <BrandMark size={88} showWordmark tagline />
+            <Text className="text-sm text-muted text-center max-w-xs">
+              One intelligent workspace for building, creating, learning and getting things done.
             </Text>
           </View>
 

@@ -1,11 +1,5 @@
-/**
- * Typing Animation Component
- * 
- * Displays animated typing effect for AI responses
- * Makes conversations feel more natural and human-like
- */
-
-import React, { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { RefObject } from "react";
 import { View, Text, Animated, ScrollView } from "react-native";
 import { useColors } from "@/hooks/use-colors";
 
@@ -45,7 +39,7 @@ export function TypingAnimation({
 
   return (
     <View className={className}>
-      <Text className="text-base text-foreground leading-relaxed">
+      <Text className="text-base text-foreground leading-relaxed" style={{ color: colors.foreground }}>
         {displayedText}
         {!isComplete && <TypingCursor />}
       </Text>
@@ -58,7 +52,7 @@ export function TypingAnimation({
  */
 function TypingCursor() {
   const colors = useColors();
-  const opacity = new Animated.Value(1);
+  const opacity = useMemo(() => new Animated.Value(1), []);
 
   useEffect(() => {
     const animation = Animated.loop(
@@ -144,8 +138,8 @@ export function AnimatedMessageBubble({
   className,
 }: AnimatedMessageBubbleProps) {
   const colors = useColors();
-  const scaleAnim = new Animated.Value(0.8);
-  const opacityAnim = new Animated.Value(0);
+  const scaleAnim = useMemo(() => new Animated.Value(0.8), []);
+  const opacityAnim = useMemo(() => new Animated.Value(0), []);
 
   useEffect(() => {
     Animated.parallel([
@@ -204,7 +198,7 @@ export function AnimatedMessageBubble({
 /**
  * Smooth scroll to bottom animation
  */
-export function useSmoothScrollAnimation(scrollViewRef: React.RefObject<ScrollView>) {
+export function useSmoothScrollAnimation(scrollViewRef: RefObject<ScrollView>) {
   const scrollToBottom = (animated: boolean = true) => {
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollToEnd({ animated });
@@ -223,8 +217,8 @@ interface MessageEntranceProps {
 }
 
 export function MessageEntrance({ children, delay = 0 }: MessageEntranceProps) {
-  const translateY = new Animated.Value(20);
-  const opacity = new Animated.Value(0);
+  const translateY = useMemo(() => new Animated.Value(20), []);
+  const opacity = useMemo(() => new Animated.Value(0), []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
