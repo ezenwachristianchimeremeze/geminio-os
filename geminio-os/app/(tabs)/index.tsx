@@ -40,20 +40,20 @@ function PlanPreviewCard({ h, c }: { h: ReturnType<typeof useHomeChat>; c: Retur
             <Text style={{ color: c.foreground, fontSize: 14, flex: 1 }}>{i + 1}. {st.title}</Text>
             {!isFinal ? <Pressable accessibilityRole="button" accessibilityLabel={`Move ${st.title} up`} disabled={i === 0} onPress={() => move(i, -1)} style={styles.mini}><Text style={{ color: c.foreground }}>↑</Text></Pressable> : null}
             {!isFinal ? <Pressable accessibilityRole="button" accessibilityLabel={`Move ${st.title} down`} disabled={i >= d.steps.length - 2} onPress={() => move(i, 1)} style={styles.mini}><Text style={{ color: c.foreground }}>↓</Text></Pressable> : null}
-            {!isFinal ? <Pressable accessibilityRole="button" accessibilityLabel={`Remove step ${st.title}`} onPress={() => h.editPlan(roles.filter((r) => r !== st.role))} style={styles.mini}><Text style={{ color: c.foreground }}>✕</Text></Pressable> : null}
+            {!isFinal ? <Pressable accessibilityRole="button" accessibilityLabel={`Remove step ${st.title}`} onPress={() => h.editPlan(roles.filter((r) => r !== st.role))} style={styles.mini}><Text style={{ color: c.foreground }}>×</Text></Pressable> : null}
           </View>
         );
       })}
       {addable.length > 0 ? (
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
-          {addable.map((r) => <Pressable key={r.id} accessibilityRole="button" accessibilityLabel={`Add step ${r.title}`} onPress={() => h.editPlan([...roles.slice(0, -1), r.id, roles[roles.length - 1]])} style={styles.mini}><Text style={{ color: c.foreground }}>{r.title}</Text></Pressable>)}
+          {addable.map((r) => <Pressable key={r.id} accessibilityRole="button" accessibilityLabel={`Add step ${r.title}`} onPress={() => h.editPlan([...roles.slice(0, -1), r.id, roles[roles.length - 1]])} style={[styles.chip, { borderColor: c.border }]}><Text style={{ color: c.foreground }}>{r.title}</Text></Pressable>)}
         </View>
       ) : null}
       {d.usesWebSearch ? <Text style={{ color: c.muted, fontSize: 13 }}>Includes a web search.</Text> : null}
       <Text style={{ color: d.canAfford === false ? c.errorText : c.foreground, fontWeight: "700" }}>Estimated credits: {d.estimatedCredits}{d.available !== null ? ` (you have ${d.available})` : ""}</Text>
-      {d.canAfford === false ? <Text accessibilityRole="alert" style={{ color: c.errorText, fontSize: 13 }}>Not enough credits for this plan. Nothing will run.</Text> : <Text style={{ color: c.muted, fontSize: 13 }}>This plan looks affordable.</Text>}
+      {d.canAfford === false ? <Text accessibilityRole="alert" style={{ color: c.errorText, fontSize: 13 }}>Not enough credits for this plan. Nothing will run.</Text> : <Text style={{ color: c.muted, fontSize: 13 }}>You can approve and run this plan.</Text>}
       <View style={{ flexDirection: "row", gap: 8 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Approve and run" disabled={d.canAfford === false} onPress={() => void h.approvePreview()} style={[styles.approve, { backgroundColor: c.primary }]}><Text style={{ color: c.primaryForeground, fontWeight: "700" }}>Approve & run</Text></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel="Approve and run" disabled={d.canAfford === false} onPress={() => void h.approvePreview()} style={[styles.approve, { backgroundColor: c.primary, opacity: d.canAfford === false ? 0.5 : 1 }]}><Text style={{ color: c.primaryForeground }}>Approve and run</Text></Pressable>
         <Pressable accessibilityRole="button" accessibilityLabel="Cancel plan" onPress={h.cancelPreview} style={[styles.approve, { backgroundColor: c.surfaceMuted }]}><Text style={{ color: c.foreground }}>Cancel</Text></Pressable>
       </View>
     </View>
@@ -87,6 +87,7 @@ export default function HomeScreen() {
     const m = messages.find((x) => x.id === h.lastAssistantId);
     if (m) { spokenRef.current = m.id; h.speak(m.id, m.content); }
   }, [voiceMode, h.turn.s, h.lastAssistantId]);
+
   useEffect(() => { if (h.notice) { const t = setTimeout(h.clearNotice, 3500); return () => clearTimeout(t); } }, [h.notice]);
   useEffect(() => { const t = setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 50); return () => clearTimeout(t); }, [messages.length, h.pendingUser, h.status]);
 
@@ -97,6 +98,13 @@ export default function HomeScreen() {
 
   const sendSuggestion = (t: string) => { void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); void h.requestSend(t); };
   const data = useMemo(() => messages, [messages]);
+  const contextSummary = h.lastContext ? [
+    h.lastContext.conversations.length ? `${h.lastContext.conversations.length} conversation${h.lastContext.conversations.length === 1 ? "" : "s"}` : null,
+    h.lastContext.workspaceFiles.length ? `${h.lastContext.workspaceFiles.length} project file${h.lastContext.workspaceFiles.length === 1 ? "" : "s"}` : null,
+    h.lastContext.secretFilesExcluded ? `${h.lastContext.secretFilesExcluded} secret file${h.lastContext.secretFilesExcluded === 1 ? "" : "s"} excluded` : null,
+    h.lastContext.omittedFiles ? `${h.lastContext.omittedFiles} omitted` : null,
+  ].filter(Boolean).join(" · ") : null;
+  const searchIssue = h.searchReport.attempted && h.searchReport.status !== "ok" ? (h.searchReport.reason ?? (h.searchReport.status === "failed" ? "Search failed." : "Search is unavailable right now.")) : null;
 
   const header = (
     <View style={[styles.top, { borderBottomColor: c.border }]}>
@@ -106,7 +114,7 @@ export default function HomeScreen() {
         {h.temporary || h.conversation?.temporary ? <Text style={{ color: c.warningText, fontSize: 11 }}>Temporary — deleted after {h.config?.temporaryRetentionHours ?? 24}h, not in history</Text> : null}
       </Pressable>
       <Pressable accessibilityRole="button" accessibilityLabel="Search and browse conversations" onPress={() => setHistoryOpen(true)} style={styles.hit}><Text style={{ color: c.foreground, fontSize: 18 }}>⌕</Text></Pressable>
-      <Pressable accessibilityRole="button" accessibilityLabel="More options" accessibilityState={{ expanded: menuOpen }} onPress={() => setMenuOpen((v) => !v)} style={styles.hit}><Text style={{ color: c.foreground, fontSize: 18 }}>⋯</Text></Pressable>
+      <Pressable accessibilityRole="button" accessibilityLabel="More options" accessibilityState={{ expanded: menuOpen }} onPress={() => setMenuOpen((v) => !v)} style={styles.hit}><Text style={{ color: c.foreground, fontSize: 20 }}>⋯</Text></Pressable>
       {menuOpen ? (
         <View style={[styles.menu, { backgroundColor: c.surface, borderColor: c.border }]} accessibilityRole="menu">
           {[
@@ -118,7 +126,7 @@ export default function HomeScreen() {
             { l: h.contextSel.historyMode !== "conversation" || h.contextSel.conversationIds.length || h.contextSel.workspaceId ? "Context controls… (custom)" : "Context controls…", a: () => setCtxOpen(true) },
             { l: "Personalization…", a: () => setPrefsOpen(true) },
             { l: voiceMode ? "Voice conversation: on" : "Voice conversation: off", a: () => { setVoiceMode((v) => !v); h.stopSpeech(); } },
-            ...(h.conversationId && h.conversation ? [{ l: "Conversation actions…", a: () => setConvMenu({ id: h.conversation!.id, title: h.conversation!.title, pinned: h.conversation!.pinned, status: h.conversation!.status, shared: h.conversation!.shared, lastMessageAt: h.conversation!.lastMessageAt }) }] : []),
+            ...(h.conversationId && h.conversation ? [{ l: "Conversation actions…", a: () => setConvMenu({ id: h.conversation!.id, title: h.conversation!.title, pinned: h.conversation!.pinned, status: h.conversation!.archived ? "archived" : "active", shared: !!h.conversation!.shared, lastMessageAt: h.conversation!.updatedAt }) }] : []),
           ].map((it) => (
             <Pressable key={it.l} accessibilityRole="menuitem" style={styles.menuItem} onPress={() => { setMenuOpen(false); it.a(); }}><Text style={{ color: c.foreground, fontSize: 15 }}>{it.l}</Text></Pressable>
           ))}
@@ -159,16 +167,16 @@ export default function HomeScreen() {
                   {h.pendingUser && !messages.some((m) => m.role === "user" && m.content === h.pendingUser && h.turn.s !== "sending") ? (
                     <View style={{ alignItems: "flex-end" }}><View style={[styles.pending, { backgroundColor: c.primary }]}><Text style={{ color: c.primaryForeground, fontSize: 16 }}>{h.pendingUser}</Text></View></View>
                   ) : null}
-                  {h.lastContext ? <View accessibilityLabel="Context used" style={[styles.banner, { borderColor: c.border, backgroundColor: c.surface, marginHorizontal: 0 }]}><Text style={{ color: c.foreground }}>{[h.lastContext.conversations.length ? `Conversations: ${h.lastContext.conversations.map((x) => `${x.title} (${x.messages} messages)`).join(", ")}` : "", h.lastContext.workspaceFiles.length ? `Workspace files: ${h.lastContext.workspaceFiles.map((x) => x.path).join(", ")}` : "", h.lastContext.secretFilesExcluded ? `Secret files excluded: ${h.lastContext.secretFilesExcluded}` : "", h.lastContext.omittedFiles ? `Additional files omitted: ${h.lastContext.omittedFiles}` : ""].filter(Boolean).join(" · ")}</Text></View> : null}
+                  {h.lastContext ? <View accessibilityLabel="Context used" style={[styles.banner, { borderColor: c.border, backgroundColor: c.surface, marginHorizontal: 0 }]}><Text style={{ color: c.muted, fontSize: 12 }}>{contextSummary}</Text></View> : null}
                   {h.streamingText ? (
                     <View accessibilityLiveRegion="polite" accessibilityLabel="Geminio is replying" style={[styles.pending, { backgroundColor: c.surface, borderColor: c.border, borderWidth: 1, marginHorizontal: 0 }]}>
                       <MessageContent markdown={h.streamingText} onCopyCode={(code) => void h.copy(code, "Code copied")} />
                       <Text style={{ color: c.muted, fontSize: 12, marginTop: 4 }}>Generating… (updates every moment; stop any time)</Text>
                     </View>
                   ) : null}
-                  {h.searchReport.attempted && h.searchReport.status !== "ok" ? <View accessibilityRole="alert" style={[styles.banner, { borderColor: c.warning, backgroundColor: c.surface }]}><Text style={{ color: c.warningText }}>{h.searchReport.reason ?? (h.searchReport.status === "unavailable" ? "Web search is unavailable." : "Web search could not be completed.")}</Text></View> : null}
+                  {searchIssue ? <View accessibilityRole="alert" style={[styles.banner, { borderColor: c.warning, backgroundColor: c.surface }]}><Text style={{ color: c.warningText, fontSize: 14 }}>⚠ {searchIssue}</Text></View> : null}
                   {h.turn.s === "running" && h.turn.steps.length > 0 ? (
-                    <View accessibilityLabel="Task progress" style={[styles.progress, { borderColor: c.border, backgroundColor: c.surface }]}>
+                    <View accessibilityLabel="Task progress" style={[styles.progress, { borderColor: c.border, backgroundColor: c.surface }]}> 
                       {h.turn.steps.map((s) => <Text key={s.key} style={{ color: s.state === "active" ? c.primaryText : s.state === "failed" ? c.errorText : c.muted, fontSize: 13 }}>{s.state === "active" ? "•" : "○"} {s.label}</Text>)}
                     </View>
                   ) : null}
@@ -181,7 +189,7 @@ export default function HomeScreen() {
                   ) : null}
                   {h.turn.s === "done" && moduleHint ? (
                     <View style={[styles.banner, { borderColor: c.border, backgroundColor: c.surface }]}>
-                      <Pressable accessibilityRole="button" accessibilityLabel={moduleHint.label} onPress={() => router.push(moduleHint.route as never)} style={styles.retry}><Text style={{ color: c.primaryText, fontWeight: "700" }}>{moduleHint.label}</Text></Pressable>
+                      <Pressable accessibilityRole="button" accessibilityLabel={moduleHint.label} onPress={() => { if (moduleHint?.route) router.push(moduleHint.route as never); }} style={styles.retry}><Text style={{ color: c.primaryText, fontWeight: "700" }}>{moduleHint.label}</Text></Pressable>
                       {moduleHint.note ? <Text style={{ color: c.muted, fontSize: 12 }}>{moduleHint.note}</Text> : null}
                     </View>
                   ) : null}
@@ -196,8 +204,7 @@ export default function HomeScreen() {
             onSend={() => void h.requestSend()} onStop={() => void h.stopGeneration()} stopDisabled={h.turn.s !== "running" && h.turn.s !== "paused"}
             paused={h.turn.s === "paused"} canPause={h.turn.s === "running" && h.stepsTotal > 1} onPause={() => void h.pauseRun()} onResume={() => void h.resumeRun()}
             voice={h.voice} voiceElapsedMs={h.voiceElapsedMs} micAvailable={h.micAvailable} micSupported={h.micSupported}
-            onMic={() => void h.startRecording()} onPauseRec={h.pauseRecording} onResumeRec={h.resumeRecording} onStopRec={() => void h.stopRecording()} onCancelRec={h.cancelRecording}
-            onAcceptTranscript={() => { const t = h.voice.s === "review" ? h.voice.text : ""; h.acceptTranscript(); if (voiceMode && t && h.voice.s === "review" && !h.voice.uncertain) void h.sendMessage(t); }} onDismissVoice={h.dismissVoiceError}
+            onMic={() => void h.startRecording()} onPauseRec={h.pauseRecording} onResumeRec={h.resumeRecording} onStopRec={() => void h.stopRecording()} onCancelRec={h.cancelRecording} onAcceptTranscript={() => { const t = h.voice.s === "review" ? h.voice.text : ""; h.acceptTranscript(); if (voiceMode && t && h.voice.s === "review" && !h.voice.uncertain) void h.sendMessage(t); }} onDismissVoice={h.dismissVoiceError}
             attachments={h.attachments} uploading={h.uploading} onAttachImage={() => void h.attach("image")} onAttachDoc={() => void h.attach("document")} onRemoveAttachment={h.removeAttachment}
             webMode={h.webMode} webSearchAvailable={h.config?.webSearch ?? false} onToggleWeb={() => h.setWebMode(h.webMode === "auto" ? "on" : h.webMode === "on" ? "off" : "auto")}
             planLabel={h.planType ? (h.planTypes.find((t) => t.id === h.planType)?.label ?? h.planType) : null}
@@ -206,7 +213,7 @@ export default function HomeScreen() {
         </View>
       </KeyboardAvoidingView>
 
-      <HistorySheet visible={historyOpen} onClose={() => setHistoryOpen(false)} currentId={h.conversationId} onOpen={h.openConversation} onNew={(temporary: boolean) => h.startNew({ temporary })} onMenu={(cv: ConvSummary) => setConvMenu(cv)} />
+      <HistorySheet visible={historyOpen} onClose={() => setHistoryOpen(false)} currentId={h.conversationId} onOpen={h.openConversation} onNew={(temporary: boolean) => h.startNew({ temporary })} onMenu={(item: ConvSummary) => setConvMenu(item)} />
       <ConversationMenu target={convMenu} onClose={() => setConvMenu(null)} onChanged={() => void h.refreshHistory()} onDeleted={(id: string) => { if (id === h.conversationId) h.startNew(); }} onNotice={h.setNotice} />
       <ActionsSheet visible={actionsOpen} onClose={() => setActionsOpen(false)} onNotice={h.setNotice} />
       <CodeRunSheet run={codeRun} onClose={() => setCodeRun(null)} />
