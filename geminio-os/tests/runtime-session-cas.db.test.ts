@@ -8,8 +8,8 @@ import { DatabaseSync } from "./helpers/sqlite";
 
 const open = () => { const f = join(mkdtempSync(join(tmpdir(), "rt-")), "db.sqlite"); const a = new DatabaseSync(f); a.exec("CREATE TABLE s (id TEXT PRIMARY KEY, status TEXT NOT NULL, url TEXT)"); a.prepare("INSERT INTO s VALUES ('s1','starting',NULL)").run(); return { a, b: new DatabaseSync(f) }; };
 const finishStart = (db: InstanceType<typeof DatabaseSync>, status: string) => Number(db.prepare("UPDATE s SET status=?, url='http://preview' WHERE id='s1' AND status IN ('starting')").run(status).changes);
-const stop = (db: DatabaseSync) => Number(db.prepare("UPDATE s SET status='stopped' WHERE id='s1'").run().changes);
-const row = (db: DatabaseSync) => db.prepare("SELECT * FROM s WHERE id='s1'").get() as { status: string; url: string | null };
+const stop = (db: InstanceType<typeof DatabaseSync>) => Number(db.prepare("UPDATE s SET status='stopped' WHERE id='s1'").run().changes);
+const row = (db: InstanceType<typeof DatabaseSync>) => db.prepare("SELECT * FROM s WHERE id='s1'").get() as { status: string; url: string | null };
 
 describe("runtime start vs stop (SQLite stand-in)", () => {
   it("a start that finishes first is ready; a later stop then stops it", () => {
