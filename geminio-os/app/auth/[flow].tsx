@@ -60,7 +60,7 @@ export default function AuthFlowScreen() {
   const submit = async () => {
     const validation = validate();
     if (validation) { setError(validation); return; }
-    const apiBase = (process.env.EXPO_PUBLIC_API_URL || "").replace(/\\/$/, "");
+    const apiBase = (process.env.EXPO_PUBLIC_API_URL || "").replace(/\/$/, "");
     const request = async (path: string, body: Record<string, unknown>) => {
       const response = await fetch(apiBase + path, { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(body) });
       const data = await response.json().catch(() => ({}));
@@ -159,7 +159,7 @@ export default function AuthFlowScreen() {
                 if (!email) { setError("Return to sign-up and enter your email address."); return; }
                 setBusy(true); setError("");
                 try {
-                  const base = (process.env.EXPO_PUBLIC_API_URL || "").replace(/\\/$/, "");
+                  const base = (process.env.EXPO_PUBLIC_API_URL || "").replace(/\/$/, "");
                   const response = await fetch(base + "/api/auth/email/resend", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ email }) });
                   const data = await response.json().catch(() => ({}));
                   if (!response.ok) throw new Error(data.error || "Could not request another code.");
