@@ -1,4 +1,5 @@
 import { DatabaseSync } from "./sqlite";
+type DatabaseSyncInstance = InstanceType<typeof DatabaseSync>;
 import type { AgentTaskStore, ApprovalDecision, ApprovalRow, ApprovalStore, TaskPatch } from "../../server/task-approvals";
 
 /**
@@ -16,7 +17,7 @@ type ApprovalDbRow = { id: string; taskId: string; userId: number; action: strin
 const toRow = (r: ApprovalDbRow): ApprovalRow => ({ ...r, requestedAt: new Date(r.requestedAt), resolvedAt: r.resolvedAt === null ? null : new Date(r.resolvedAt) });
 
 export class SqliteApprovalConnection implements ApprovalStore, AgentTaskStore {
-  readonly db: DatabaseSync;
+  readonly db: DatabaseSyncInstance;
   constructor(file: string) {
     this.db = new DatabaseSync(file);
     this.db.exec("PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;");
@@ -38,7 +39,7 @@ export class SqliteApprovalConnection implements ApprovalStore, AgentTaskStore {
   }
   async updateOwned(userId: number, id: string, patch: TaskPatch, at: Date) {
     const keys = Object.keys(patch).filter((k) => ["state", "progress", "currentApprovalId", "lastError", "checkpoint"].includes(k));
-    this.db.prepare(`UPDATE agentTasks SET ${keys.map((k) => `${k}=?`).join(",")}${keys.length ? "," : ""}updatedAt=? WHERE id=? AND userId=?`).run(...keys.map((k) => (patch as Record<string, never>)[k] ?? null), at.getTime(), id, userId);
+    this.db.prepare(`UPDATE agentTasks SET ${keys.map((k) => `${k}=?`).join(",")}${keys.length ? "," : ""}updatedAt=? WHERE id=? AND userId=?`).run(...keys.map((k) => (patch as unknown as Record<string, unknown>)[k] ?? null), at.getTime(), id, userId);
   }
   async casState(userId: number, id: string, from: string, patch: TaskPatch & { state: string }, at: Date) {
     const keys = Object.keys(patch).filter((k) => ["state", "progress", "currentApprovalId", "lastError", "checkpoint"].includes(k));
