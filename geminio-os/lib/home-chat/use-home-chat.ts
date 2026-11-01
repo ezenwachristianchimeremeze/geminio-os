@@ -240,6 +240,8 @@ export function useHomeChat() {
   const selectVariant = useCallback(async (id: string) => { try { await variantMut.mutateAsync({ messageId: id }); await conversation.refetch(); } catch (e) { setNotice(`Couldn't switch response: ${errMessage(e)}`); } }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const lastAssistantId = useMemo(() => [...messages].reverse().find((m) => m.role === "assistant")?.id ?? null, [messages]);
 
+  const stepsTotal = runQuery.data?.steps?.length ?? turn.steps.length;
+
   return {
     config: config.data, balance: balance.data, conversationId, conversation: conversation.data?.conversation ?? null, messages, lastAssistantId,
     conversationError: conversation.error ? errMessage(conversation.error) : null, loadingConversation: conversation.isLoading && Boolean(conversationId),
@@ -248,7 +250,7 @@ export function useHomeChat() {
     attachments, uploading, attach, removeAttachment,
     planTypes: planTypes.data ?? [], planType, setPlanType, preview, previewing, requestSend, editPlan, approvePreview, cancelPreview,
     draft, setDraft, webMode, setWebMode, temporary, setTemporary,
-    startNew, openConversation, sendMessage, retryLast, editMessage, stopGeneration, setFeedback, copy,
+    startNew, openConversation, sendMessage, retryLast, editMessage, stopGeneration, pauseRun, resumeRun, stepsTotal, setFeedback, copy,
     speech, speak, pauseSpeech, resumeSpeech, stopSpeech, canPauseSpeech: ttsRef.current?.canPause ?? false,
     voice, voiceElapsedMs: elapsedMs(voice, now), micSupported, micAvailable, startRecording, pauseRecording, resumeRecording, stopRecording, cancelRecording, acceptTranscript, dismissVoiceError: () => dispatchVoice({ type: "DISMISS" }),
   };
