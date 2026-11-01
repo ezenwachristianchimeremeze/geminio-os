@@ -2,11 +2,12 @@
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { DatabaseSync } from "./helpers/sqlite";
 
 const open = () => { const f = join(mkdtempSync(join(tmpdir(), "rt-")), "db.sqlite"); const a = new DatabaseSync(f); a.exec("CREATE TABLE s (id TEXT PRIMARY KEY, status TEXT NOT NULL, url TEXT)"); a.prepare("INSERT INTO s VALUES ('s1','starting',NULL)").run(); return { a, b: new DatabaseSync(f) }; };
-const finishStart = (db: DatabaseSync, status: string) => Number(db.prepare("UPDATE s SET status=?, url='http://preview' WHERE id='s1' AND status IN ('starting')").run(status).changes);
+const finishStart = (db: InstanceType<typeof DatabaseSync>, status: string) => Number(db.prepare("UPDATE s SET status=?, url='http://preview' WHERE id='s1' AND status IN ('starting')").run(status).changes);
 const stop = (db: DatabaseSync) => Number(db.prepare("UPDATE s SET status='stopped' WHERE id='s1'").run().changes);
 const row = (db: DatabaseSync) => db.prepare("SELECT * FROM s WHERE id='s1'").get() as { status: string; url: string | null };
 
@@ -22,7 +23,7 @@ describe("runtime start vs stop (SQLite stand-in)", () => {
     expect(row(a)).toEqual({ id: "s1", status: "stopped", url: null });
   });
   it("production code uses the compare-and-set and discards a superseded start (static check)", () => {
-    const src = readFileSync(new URL("../server/live-builder/runtime.ts", import.meta.url), "utf8");
+    const src = readFileSync(fileURLToPath(new URL("../server/live-builder/runtime.ts", import.meta.url)), "utf8");
     expect(src).toContain('}, ["starting"]);');
     expect(src).toContain("start_superseded");
     expect(src).toMatch(/inArray\(liveBuilderRuntimeSessions\.status, onlyIfStatus\)/);
