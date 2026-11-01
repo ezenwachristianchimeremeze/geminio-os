@@ -45,7 +45,7 @@ export function HistorySheet({ visible, onClose, currentId, onOpen, onNew, onMen
       </View>
       <ScrollView style={{ maxHeight: 420 }}>
         {list.isLoading ? <ActivityIndicator color={c.primaryText} /> : null}
-        {list.error ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>Couldn't load conversations: {list.error.message}</Text> : null}
+        {list.error ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>Couldn&apos;t load conversations: {list.error.message}</Text> : null}
         {list.data && list.data.length === 0 ? <Text style={{ color: c.muted, padding: 12 }}>{dq ? "No conversations match your search." : archived ? "No archived conversations." : "No conversations yet. Say hello!"}</Text> : null}
         {(list.data ?? []).map((cv) => (
           <View key={cv.id} style={[styles.convRow, { backgroundColor: cv.id === currentId ? c.surfaceMuted : "transparent" }]}>
@@ -74,7 +74,7 @@ export function ConversationMenu({ target, onClose, onChanged, onDeleted, onNoti
   const doExport = (format: "markdown" | "json") => run(async () => {
     const r = await exp.mutateAsync({ id: target.id, format });
     if (Platform.OS === "web" && typeof document !== "undefined") { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([r.content], { type: r.mimeType })); a.download = r.filename; a.click(); URL.revokeObjectURL(a.href); onNotice(`Exported ${r.filename}`); }
-    else { const { copyText } = await import("@/lib/home-chat/platform"); onNotice((await copyText(r.content)) ? `Export copied to clipboard (${r.filename})` : "Export is ready but this device can't copy it."); }
+    else { const { copyText } = await import("@/lib/home-chat/platform"); onNotice((await copyText(r.content)) ? `Export copied to clipboard (${r.filename})` : "Export is ready but this device can&apos;t copy it."); }
   });
   return (
     <Sheet visible onClose={onClose} title={target.title}>
@@ -105,7 +105,7 @@ export function ConversationMenu({ target, onClose, onChanged, onDeleted, onNoti
       )}
       {mode === "delete" && (
         <View style={{ gap: 8 }}>
-          <Text style={{ color: c.foreground }}>Delete "{target.title}" permanently? All its messages are removed and any share link stops working. This can't be undone.</Text>
+          <Text style={{ color: c.foreground }}>Delete &quot;{target.title}&quot; permanently? All its messages are removed and any share link stops working. This can&apos;t be undone.</Text>
           <Pressable accessibilityRole="button" disabled={busy} style={[styles.primary, { backgroundColor: c.error }]} onPress={() => run(async () => { await del.mutateAsync({ id: target.id }); onDeleted(target.id); }, "Conversation deleted")}><Text style={{ color: c.errorForeground, fontWeight: "700" }}>{busy ? "Deleting…" : "Delete permanently"}</Text></Pressable>
           <Pressable accessibilityRole="button" style={[styles.primary, { backgroundColor: c.surfaceMuted }]} onPress={() => setMode("menu")}><Text style={{ color: c.foreground }}>Keep it</Text></Pressable>
         </View>
@@ -206,7 +206,7 @@ export function SchedulesSheet({ visible, onClose, onNotice }: { visible: boolea
     try {
       await create.mutateAsync({ kind, title, prompt: kind === "prompt" ? prompt : null, recurrence: rep === "weekly" ? { kind: "weekly", days } : { kind: rep }, timezone: tz, timeOfDay: time, onceDate: rep === "once" ? date : undefined });
       await utils.homeChat.schedules.list.invalidate(); onNotice("Schedule saved"); reset();
-    } catch (e) { setErr(e instanceof Error ? e.message : "Couldn't save."); }
+    } catch (e) { setErr(e instanceof Error ? e.message : "Couldn&apos;t save."); }
   };
   const act = async (fn: () => Promise<unknown>, ok: string) => { try { await fn(); await utils.homeChat.schedules.list.invalidate(); onNotice(ok); } catch (e) { onNotice(e instanceof Error ? e.message : "Action failed."); } };
   const input = [styles.search, { color: c.foreground, borderColor: c.border, backgroundColor: c.background }];
@@ -231,7 +231,7 @@ export function SchedulesSheet({ visible, onClose, onNotice }: { visible: boolea
           </View>
         )}
         {list.isLoading ? <ActivityIndicator color={c.primaryText} /> : null}
-        {list.error ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>Couldn't load schedules: {list.error.message}</Text> : null}
+        {list.error ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>Couldn&apos;t load schedules: {list.error.message}</Text> : null}
         {list.data && list.data.length === 0 && !adding ? <Text style={{ color: c.muted, padding: 8 }}>Nothing scheduled.</Text> : null}
         {(list.data ?? []).map((r) => (
           <View key={r.id} style={{ paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: c.border }}>
@@ -259,7 +259,7 @@ export function TasksSheet({ visible, onClose, onOpenConversation, onNotice }: {
     <Sheet visible={visible} onClose={onClose} title="Tasks">
       <ScrollView style={{ maxHeight: 480 }}>
         {list.isLoading ? <ActivityIndicator color={c.primaryText} /> : null}
-        {list.error ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>Couldn't load tasks: {list.error.message}</Text> : null}
+        {list.error ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>Couldn&apos;t load tasks: {list.error.message}</Text> : null}
         {list.data && list.data.length === 0 ? <Text style={{ color: c.muted, padding: 12 }}>No tasks yet.</Text> : null}
         {(list.data ?? []).map((t) => (
           <View key={t.runId} style={[styles.convRow, { flexDirection: "column", alignItems: "stretch", paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: c.border }]}>
@@ -300,7 +300,7 @@ export function ContextSheet({ visible, onClose, value, onChange, currentId }: {
         <Text style={{ color: c.foreground, fontWeight: "700", marginTop: 12, marginBottom: 4 }}>Project files</Text>
         <Pressable accessibilityRole="radio" accessibilityState={{ selected: value.workspaceId === null }} onPress={() => onChange({ ...value, workspaceId: null })} style={styles.row}><Text style={{ color: value.workspaceId === null ? c.primaryText : c.foreground }}>{value.workspaceId === null ? "◉" : "○"} None</Text></Pressable>
         {wsList.map((w) => <Pressable key={w.id} accessibilityRole="radio" accessibilityState={{ selected: value.workspaceId === w.id }} onPress={() => onChange({ ...value, workspaceId: w.id })} style={styles.row}><Text numberOfLines={1} style={{ color: value.workspaceId === w.id ? c.primaryText : c.foreground }}>{value.workspaceId === w.id ? "◉" : "○"} {w.name ?? w.title ?? w.id}</Text></Pressable>)}
-        {spaces.error ? <Text style={{ color: c.muted, fontSize: 12 }}>Projects aren't available right now.</Text> : null}
+        {spaces.error ? <Text style={{ color: c.muted, fontSize: 12 }}>Projects aren&apos;t available right now.</Text> : null}
       </ScrollView>
       <Pressable accessibilityRole="button" onPress={() => { onChange({ historyMode: "conversation", conversationIds: [], workspaceId: null }); }} style={[styles.primary, { backgroundColor: c.surfaceMuted, marginTop: 10, flex: 0 }]}><Text style={{ color: c.foreground }}>Reset to default</Text></Pressable>
     </Sheet>
@@ -312,14 +312,14 @@ export function PersonalizationSheet({ visible, onClose, onNotice }: { visible: 
   const c = useColors(); const q = trpc.homeChat.preferences.get.useQuery(undefined, { enabled: visible }); const save = trpc.homeChat.preferences.set.useMutation();
   const [instr, setInstr] = useState(""); const [style, setStyle] = useState<"concise" | "balanced" | "detailed">("balanced"); const [lang, setLang] = useState(""); const [err, setErr] = useState<string | null>(null);
   useEffect(() => { if (q.data) { setInstr(q.data.customInstructions); setStyle(q.data.responseStyle); setLang(q.data.language ?? ""); } }, [q.data]);
-  const submit = async () => { setErr(null); try { await save.mutateAsync({ customInstructions: instr, responseStyle: style, language: lang.trim() || null, aiLevel: q.data?.aiLevel ?? "standard" }); onNotice("Preferences saved"); onClose(); } catch (e) { setErr(e instanceof Error ? e.message : "Couldn't save."); } };
+  const submit = async () => { setErr(null); try { await save.mutateAsync({ customInstructions: instr, responseStyle: style, language: lang.trim() || null, aiLevel: q.data?.aiLevel ?? "standard" }); onNotice("Preferences saved"); onClose(); } catch (e) { setErr(e instanceof Error ? e.message : "Couldn&apos;t save."); } };
   return (
     <Sheet visible={visible} onClose={onClose} title="Personalization">
       {q.isLoading ? <ActivityIndicator color={c.primaryText} /> : null}
-      {q.error ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>Couldn't load preferences: {q.error.message}</Text> : null}
+      {q.error ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>Couldn&apos;t load preferences: {q.error.message}</Text> : null}
       {err ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>⚠ {err}</Text> : null}
-      <Text style={{ color: c.muted, fontSize: 12, marginBottom: 4 }}>Custom instructions (shape tone and format; they can't change safety rules)</Text>
-      <TextInput value={instr} onChangeText={setInstr} multiline maxLength={1500} accessibilityLabel="Custom instructions" placeholder="e.g. I'm a TypeScript developer. Prefer short answers." placeholderTextColor={c.muted} style={[styles.search, { color: c.foreground, borderColor: c.border, backgroundColor: c.background, minHeight: 100 }]} />
+      <Text style={{ color: c.muted, fontSize: 12, marginBottom: 4 }}>Custom instructions (shape tone and format; they can&apos;t change safety rules)</Text>
+      <TextInput value={instr} onChangeText={setInstr} multiline maxLength={1500} accessibilityLabel="Custom instructions" placeholder="e.g. I&apos;m a TypeScript developer. Prefer short answers." placeholderTextColor={c.muted} style={[styles.search, { color: c.foreground, borderColor: c.border, backgroundColor: c.background, minHeight: 100 }]} />
       <View style={{ flexDirection: "row", gap: 8, marginVertical: 10 }}>
         {(["concise", "balanced", "detailed"] as const).map((st) => <Pressable key={st} accessibilityRole="radio" accessibilityState={{ selected: style === st }} onPress={() => setStyle(st)} style={[styles.tab, { backgroundColor: style === st ? c.surfaceMuted : "transparent", borderColor: c.border }]}><Text style={{ color: style === st ? c.primaryText : c.muted, fontWeight: "600" }}>{st}</Text></Pressable>)}
       </View>
@@ -349,7 +349,7 @@ export function MoreSheet({ message, onClose, onPrompt, onReport, onNotice }: { 
       {mode === "file" && (
         <View style={{ gap: 4 }}>
           {([["pdf", "PDF document (.pdf)"], ["docx", "Word document (.docx)"], ["xlsx", "Excel workbook from tables (.xlsx)"], ["md", "Markdown (.md)"], ["txt", "Plain text (.txt)"], ["csv", "CSV from the first table (.csv)"]] as const).map(([f, l]) => (
-            <Row key={f} label={busy ? "Creating…" : l} onPress={async () => { if (busy) return; setBusy(true); try { const r = await gen.mutateAsync({ messageId: message.id, format: f }); onNotice(`Created ${r.filename} (${r.sizeBytes} bytes)`); void Linking.openURL(r.url); onClose(); } catch (e) { onNotice(e instanceof Error ? e.message : "Couldn't create the file."); } finally { setBusy(false); } }} />
+            <Row key={f} label={busy ? "Creating…" : l} onPress={async () => { if (busy) return; setBusy(true); try { const r = await gen.mutateAsync({ messageId: message.id, format: f }); onNotice(`Created ${r.filename} (${r.sizeBytes} bytes)`); void Linking.openURL(r.url); onClose(); } catch (e) { onNotice(e instanceof Error ? e.message : "Couldn&apos;t create the file."); } finally { setBusy(false); } }} />
           ))}
           <Text style={{ color: c.muted, fontSize: 12 }}>The file is stored, read back and checked before it is offered to you.</Text>
         </View>
@@ -358,7 +358,7 @@ export function MoreSheet({ message, onClose, onPrompt, onReport, onNotice }: { 
         <Pressable accessibilityRole="button" disabled={!val.trim()} style={[styles.primary, { backgroundColor: c.primary, opacity: val.trim() ? 1 : 0.5 }]} onPress={() => { onPrompt(`Translate this into ${val.trim()}, keeping formatting:\n${quote(message.content)}`); onClose(); }}><Text style={{ color: c.primaryForeground, fontWeight: "700" }}>Translate</Text></Pressable></View>)}
       {mode === "report" && (<View style={{ gap: 8 }}><TextInput value={val} onChangeText={setVal} placeholder="What was wrong with this response?" placeholderTextColor={c.muted} multiline autoFocus maxLength={500} accessibilityLabel="Describe the problem" style={[styles.search, { color: c.foreground, borderColor: c.border, backgroundColor: c.background, minHeight: 80 }]} />
         <Pressable accessibilityRole="button" disabled={!val.trim()} style={[styles.primary, { backgroundColor: c.primary, opacity: val.trim() ? 1 : 0.5 }]} onPress={() => { onReport(message.id, val.trim()); onClose(); }}><Text style={{ color: c.primaryForeground, fontWeight: "700" }}>Submit report</Text></Pressable>
-        <Text style={{ color: c.muted, fontSize: 12 }}>Saved as "not helpful" feedback with your note on this response.</Text></View>)}
+        <Text style={{ color: c.muted, fontSize: 12 }}>Saved as &quot;not helpful&quot; feedback with your note on this response.</Text></View>)}
     </Sheet>
   );
 }
