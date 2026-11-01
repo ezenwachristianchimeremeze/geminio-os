@@ -39,11 +39,11 @@ export class SqliteApprovalConnection implements ApprovalStore, AgentTaskStore {
   }
   async updateOwned(userId: number, id: string, patch: TaskPatch, at: Date) {
     const keys = Object.keys(patch).filter((k) => ["state", "progress", "currentApprovalId", "lastError", "checkpoint"].includes(k));
-    this.db.prepare(`UPDATE agentTasks SET ${keys.map((k) => `${k}=?`).join(",")}${keys.length ? "," : ""}updatedAt=? WHERE id=? AND userId=?`).run(...keys.map((k) => (patch as unknown as Record<string, unknown>)[k] ?? null), at.getTime(), id, userId);
+    this.db.prepare(`UPDATE agentTasks SET ${keys.map((k) => `${k}=?`).join(",")}${keys.length ? "," : ""}updatedAt=? WHERE id=? AND userId=?`).run(...keys.map((k) => (patch as unknown as Record<string, import("node:sqlite").SQLInputValue>)[k] ?? null), at.getTime(), id, userId);
   }
   async casState(userId: number, id: string, from: string, patch: TaskPatch & { state: string }, at: Date) {
     const keys = Object.keys(patch).filter((k) => ["state", "progress", "currentApprovalId", "lastError", "checkpoint"].includes(k));
-    return Number(this.db.prepare(`UPDATE agentTasks SET ${keys.map((k) => `${k}=?`).join(",")},updatedAt=? WHERE id=? AND userId=? AND state=?`).run(...keys.map((k) => (patch as Record<string, never>)[k] ?? null), at.getTime(), id, userId, from).changes);
+    return Number(this.db.prepare(`UPDATE agentTasks SET ${keys.map((k) => `${k}=?`).join(",")},updatedAt=? WHERE id=? AND userId=? AND state=?`).run(...keys.map((k) => (patch as unknown as Record<string, import("node:sqlite").SQLInputValue>)[k] ?? null), at.getTime(), id, userId, from).changes);
   }
   async getOwned(userId: number, id: string) {
     return (this.db.prepare("SELECT id,userId,state,progress,currentApprovalId,lastError,checkpoint FROM agentTasks WHERE id=? AND userId=?").get(id, userId) as never) ?? null;
