@@ -24,7 +24,7 @@ export default function SettingsScreen() {
         <Text style={[styles.groupTitle,{color:colors.muted}]}>Account & sign-in</Text>
         <View style={[styles.group,{backgroundColor:colors.surface,borderColor:colors.border}]}>
           <SettingRow icon="account-circle" title="Account details" subtitle={authMethod === "none" ? "Sign in to view account details" : "Signed in using " + authMethod} onPress={() => router.push("/(tabs)/profile")}/>
-          <SettingRow icon="google" title="Google sign-in" subtitle="Provider sign-in is available when server credentials are configured" onPress={() => router.push("/auth-screen")}/>
+          <SettingRow icon="login" title="Google sign-in" subtitle="Provider sign-in is available when server credentials are configured" onPress={() => router.push("/auth-screen")}/>
         </View>
         <Text style={[styles.groupTitle,{color:colors.muted}]}>Information & support</Text>
         <View style={[styles.group,{backgroundColor:colors.surface,borderColor:colors.border}]}>
@@ -40,7 +40,7 @@ export default function SettingsScreen() {
     </ScreenContainer>
   );
 }
-function SettingRow({icon,title,subtitle,onPress}:{icon:"account-circle"|"google"|"person"|"description"|"mail-outline";title:string;subtitle:string;onPress:()=>void}){
+function SettingRow({icon,title,subtitle,onPress}:{icon:"account-circle"|"login"|"person"|"description"|"mail-outline";title:string;subtitle:string;onPress:()=>void}){
  const colors=useColors();
  return <Pressable accessibilityRole="button" accessibilityLabel={title} onPress={onPress} style={({pressed})=>[styles.row,pressed&&styles.pressed]}>
   <View style={[styles.icon,{backgroundColor:colors.primary+"18"}]}><AppIcon name={icon} color={colors.primary} size={19}/></View>
