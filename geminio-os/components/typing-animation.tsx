@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import type { RefObject } from "react";
 import { View, Text, Animated, ScrollView } from "react-native";
 import { useColors } from "@/hooks/use-colors";
 
@@ -197,7 +198,7 @@ export function AnimatedMessageBubble({
 /**
  * Smooth scroll to bottom animation
  */
-export function useSmoothScrollAnimation(scrollViewRef: React.RefObject<ScrollView>) {
+export function useSmoothScrollAnimation(scrollViewRef: RefObject<ScrollView>) {
   const scrollToBottom = (animated: boolean = true) => {
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollToEnd({ animated });
@@ -249,4 +250,3 @@ export function MessageEntrance({ children, delay = 0 }: MessageEntranceProps) {
     </Animated.View>
   );
 }
-
