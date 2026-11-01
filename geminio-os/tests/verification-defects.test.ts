@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { PreviewGateway, PreviewOwnershipError, type PreviewOwnershipCheck } from "@/server/live-builder/preview-gateway";
 import { RunStateError, runStateErrorToTrpcCode } from "@/server/ai-core/run-guard";
 
-const read = (p: string) => readFileSync(fileURLToPath(new URL(`../${p}`, import.meta.url)), "utf8");
+const read = (p: string) => readFileSync(fileURLToPath(String(new URL(`../${p}`, import.meta.url))), "utf8");
 
 // Fixture: user 1 owns ws-1/ver-1/rt-1; user 2 owns ws-2.
 const owned: PreviewOwnershipCheck = {
