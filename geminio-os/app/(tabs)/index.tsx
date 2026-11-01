@@ -93,6 +93,7 @@ export default function HomeScreen() {
   const title = h.conversation?.title ?? (h.temporary ? "Temporary chat" : "New chat");
   const empty = messages.length === 0 && !h.pendingUser && !h.loadingConversation;
   const lowCredits = h.turn.s === "failed" && h.turn.code === "INSUFFICIENT_CREDITS";
+  const moduleHint = h.moduleHint;
 
   const sendSuggestion = (t: string) => { void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); void h.requestSend(t); };
   const data = useMemo(() => messages, [messages]);
@@ -178,10 +179,10 @@ export default function HomeScreen() {
                       {h.turn.retryable && h.conversationId ? <Pressable accessibilityRole="button" onPress={() => void h.retryLast()} style={styles.retry}><Text style={{ color: c.primaryText, fontWeight: "700" }}>Retry</Text></Pressable> : null}
                     </View>
                   ) : null}
-                  {h.turn.s === "done" && h.moduleHint ? (
+                  {h.turn.s === "done" && moduleHint ? (
                     <View style={[styles.banner, { borderColor: c.border, backgroundColor: c.surface }]}>
-                      <Pressable accessibilityRole="button" accessibilityLabel={h.moduleHint.label} onPress={() => router.push(h.moduleHint.route as never)} style={styles.retry}><Text style={{ color: c.primaryText, fontWeight: "700" }}>{h.moduleHint.label}</Text></Pressable>
-                      {h.moduleHint.note ? <Text style={{ color: c.muted, fontSize: 12 }}>{h.moduleHint.note}</Text> : null}
+                      <Pressable accessibilityRole="button" accessibilityLabel={moduleHint.label} onPress={() => router.push(moduleHint.route as never)} style={styles.retry}><Text style={{ color: c.primaryText, fontWeight: "700" }}>{moduleHint.label}</Text></Pressable>
+                      {moduleHint.note ? <Text style={{ color: c.muted, fontSize: 12 }}>{moduleHint.note}</Text> : null}
                     </View>
                   ) : null}
                 </View>
