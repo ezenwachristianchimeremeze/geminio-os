@@ -240,7 +240,7 @@ export function useHomeChat() {
   const selectVariant = useCallback(async (id: string) => { try { await variantMut.mutateAsync({ messageId: id }); await conversation.refetch(); } catch (e) { setNotice(`Couldn't switch response: ${errMessage(e)}`); } }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const lastAssistantId = useMemo(() => [...messages].reverse().find((m) => m.role === "assistant")?.id ?? null, [messages]);
 
-  const stepsTotal = runQuery.data?.steps?.length ?? turn.steps.length;
+  const stepsTotal = runQuery.data?.steps?.length ?? 0;
 
   return {
     config: config.data, balance: balance.data, conversationId, conversation: conversation.data?.conversation ?? null, messages, lastAssistantId,
