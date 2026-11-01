@@ -23,7 +23,7 @@ describe("runtime start vs stop (SQLite stand-in)", () => {
     expect(row(a)).toEqual({ id: "s1", status: "stopped", url: null });
   });
   it("production code uses the compare-and-set and discards a superseded start (static check)", () => {
-    const src = readFileSync(fileURLToPath(new URL("../server/live-builder/runtime.ts", import.meta.url)), "utf8");
+    const src = readFileSync(fileURLToPath(String(new URL("../server/live-builder/runtime.ts", import.meta.url))), "utf8");
     expect(src).toContain('}, ["starting"]);');
     expect(src).toContain("start_superseded");
     expect(src).toMatch(/inArray\(liveBuilderRuntimeSessions\.status, onlyIfStatus\)/);
