@@ -1,4 +1,5 @@
 import { DatabaseSync } from "./sqlite";
+type DatabaseSyncInstance = InstanceType<typeof DatabaseSync>;
 import type { JobStatus, RunGuardPort, RunStatus } from "../../server/ai-core/run-guard";
 
 /**
@@ -15,7 +16,7 @@ CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY, runId TEXT NOT NULL, statu
 const q = (xs: string[]) => xs.map(() => "?").join(",");
 
 export class RunStoreConnection {
-  readonly db: DatabaseSync;
+  readonly db: DatabaseSyncInstance;
   constructor(readonly file: string) {
     this.db = new DatabaseSync(file);
     this.db.exec("PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;");
