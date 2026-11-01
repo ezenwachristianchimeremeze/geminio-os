@@ -36,7 +36,7 @@ export function MessageBubble(p: {
         {editing ? (
           <View style={{ gap: 8, minWidth: 240 }}>
             <TextInput value={text} onChangeText={setText} multiline accessibilityLabel="Edit your message" style={{ color: c.primaryForeground, fontSize: 16, minHeight: 44 }} />
-            <Text style={{ color: c.primaryForeground, fontSize: 12 }}>Saving replaces Geminio's later replies in this conversation.</Text>
+            <Text style={{ color: c.primaryForeground, fontSize: 12 }}>Saving replaces Geminio&apos;s later replies in this conversation.</Text>
             <View style={{ flexDirection: "row", gap: 8, justifyContent: "flex-end" }}>
               <Pressable accessibilityRole="button" style={styles.pill} onPress={() => { setEditing(false); setText(m.content); }}><Text style={{ color: c.primaryForeground }}>Cancel</Text></Pressable>
               <Pressable accessibilityRole="button" disabled={!text.trim() || p.busy} style={[styles.pill, { backgroundColor: c.surface }]} onPress={() => { setEditing(false); p.onEdit(m.id, text.trim()); }}><Text style={{ color: c.foreground, fontWeight: "700" }}>Save & resend</Text></Pressable>
