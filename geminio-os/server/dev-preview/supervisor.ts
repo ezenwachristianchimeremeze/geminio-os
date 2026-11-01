@@ -337,7 +337,7 @@ export class DevPreviewSupervisor {
   }
 
   private launchDevServer(token: number) {
-    const child = this.opts.spawn(PREVIEW_COMMANDS.run[0], PREVIEW_COMMANDS.run.slice(1), { cwd: this.opts.cwd, env: { ...this.opts.env, NODE_ENV: "development", CI: "1" }, detached: true });
+    const child = this.opts.spawn(PREVIEW_COMMANDS.run[0], PREVIEW_COMMANDS.run.slice(1), { cwd: this.opts.cwd, env: { ...this.opts.env, NODE_ENV: "development", CI: "1" } as NodeJS.ProcessEnv, detached: true });
     this.child = child;
     const onData = (chunk: Buffer | string) => {
       if (token !== this.runToken) return;
