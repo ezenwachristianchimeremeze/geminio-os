@@ -206,7 +206,7 @@ export default function DevPreviewScreen() {
       <View className="rounded-2xl border border-border bg-surface p-4 gap-2">
         <Text className="text-base font-semibold text-foreground">Activity</Text>
         {activityQuery.isLoading && <Text className="text-sm text-muted">Loading activity…</Text>}
-        {!activityQuery.isLoading && entries.length === 0 && <Text className="text-sm text-muted">No activity recorded yet. Entries appear when the preview supervisor runs a step or the agent records one with `pnpm dev:activity "message"`.</Text>}
+        {!activityQuery.isLoading && entries.length === 0 && <Text className="text-sm text-muted">No activity recorded yet. Entries appear when the preview supervisor runs a step or the agent records one with `pnpm dev:activity &quot;message&quot;`.</Text>}
         {entries.map((e, i) => (
           <View key={`${e.ts}-${i}`} className="gap-0.5">
             <Text className={`text-sm ${e.level === "error" ? "text-errorText" : e.level === "warning" ? "text-warningText" : "text-foreground"}`}>{i === 0 ? "Now: " : ""}{e.level === "error" ? "✕ " : e.level === "warning" ? "! " : ""}{e.message}</Text>
