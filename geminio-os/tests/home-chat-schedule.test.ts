@@ -33,7 +33,7 @@ describe("timezone math", () => {
     expect(nextOccurrence(spec, D("2026-03-08T13:00:00Z"))!.toISOString()).toBe("2026-03-09T13:00:00.000Z");
   });
   it("weekly picks the next selected weekday in the user's timezone", () => {
-    const spec = { recurrence: { kind: "weekly", days: [1] } as const, timezone: "Pacific/Auckland", timeOfDay: "08:30" };
+    const spec = { recurrence: { kind: "weekly" as const, days: [1] }, timezone: "Pacific/Auckland", timeOfDay: "08:30" };
     const n = nextOccurrence(spec, D("2026-10-06T00:00:00Z"))!; // Tue in UTC; Auckland already Tue 13:00
     expect(new Intl.DateTimeFormat("en-US", { timeZone: "Pacific/Auckland", weekday: "short", hour: "numeric", minute: "numeric", hourCycle: "h23" }).format(n).replace(",", "")).toBe("Mon 08:30");
     expect(+n).toBeGreaterThan(+D("2026-10-06T00:00:00Z"));
