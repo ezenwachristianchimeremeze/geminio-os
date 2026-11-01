@@ -45,7 +45,7 @@ export function HistorySheet({ visible, onClose, currentId, onOpen, onNew, onMen
       </View>
       <ScrollView style={{ maxHeight: 420 }}>
         {list.isLoading ? <ActivityIndicator color={c.primaryText} /> : null}
-        {list.error ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>Couldn't load conversations: {list.error.message}</Text> : null}
+        {list.error ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>Couldn&apos;t load conversations: {list.error.message}</Text> : null}
         {list.data && list.data.length === 0 ? <Text style={{ color: c.muted, padding: 12 }}>{dq ? "No conversations match your search." : archived ? "No archived conversations." : "No conversations yet. Say hello!"}</Text> : null}
         {(list.data ?? []).map((cv) => (
           <View key={cv.id} style={[styles.convRow, { backgroundColor: cv.id === currentId ? c.surfaceMuted : "transparent" }]}>
@@ -105,7 +105,7 @@ export function ConversationMenu({ target, onClose, onChanged, onDeleted, onNoti
       )}
       {mode === "delete" && (
         <View style={{ gap: 8 }}>
-          <Text style={{ color: c.foreground }}>Delete "{target.title}" permanently? All its messages are removed and any share link stops working. This can't be undone.</Text>
+          <Text style={{ color: c.foreground }}>Delete &quot;{target.title}&quot; permanently? All its messages are removed and any share link stops working. This can't be undone.</Text>
           <Pressable accessibilityRole="button" disabled={busy} style={[styles.primary, { backgroundColor: c.error }]} onPress={() => run(async () => { await del.mutateAsync({ id: target.id }); onDeleted(target.id); }, "Conversation deleted")}><Text style={{ color: c.errorForeground, fontWeight: "700" }}>{busy ? "Deleting…" : "Delete permanently"}</Text></Pressable>
           <Pressable accessibilityRole="button" style={[styles.primary, { backgroundColor: c.surfaceMuted }]} onPress={() => setMode("menu")}><Text style={{ color: c.foreground }}>Keep it</Text></Pressable>
         </View>
@@ -222,7 +222,7 @@ export function SchedulesSheet({ visible, onClose, onNotice }: { visible: boolea
             {rep === "once" ? <TextInput value={date} onChangeText={setDate} maxLength={10} placeholder="Date YYYY-MM-DD" placeholderTextColor={c.muted} accessibilityLabel="Date" style={input} /> : null}
             {rep === "weekly" ? <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>{DAYS.map((d, i) => { const on = days.includes(i); return <Pressable key={d} accessibilityRole="checkbox" accessibilityState={{ checked: on }} onPress={() => setDays(kind === "prompt" ? [i] : on ? days.filter((x) => x !== i) : [...days, i])} style={[styles.tab, { backgroundColor: on ? c.surfaceMuted : "transparent", borderColor: c.border }]}><Text style={{ color: on ? c.primaryText : c.muted }}>{d}</Text></Pressable>; })}</View> : null}
             <TextInput value={time} onChangeText={setTime} maxLength={5} placeholder="HH:MM (24h)" placeholderTextColor={c.muted} accessibilityLabel="Time of day" style={input} />
-            <Text style={{ color: c.muted, fontSize: 12 }}>Timezone: {tz}. AI tasks run at most once a day and are metered like any other request; if credits are short the run is skipped and you're notified.</Text>
+            <Text style={{ color: c.muted, fontSize: 12 }}>Timezone: {tz}. AI tasks run at most once a day and are metered like any other request; if credits are short the run is skipped and you&apos;re notified.</Text>
             {err ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>⚠ {err}</Text> : null}
             <View style={{ flexDirection: "row", gap: 8 }}>
               <Pressable accessibilityRole="button" onPress={() => void save()} disabled={create.isPending} style={[styles.primary, { backgroundColor: c.primary }]}><Text style={{ color: c.primaryForeground, fontWeight: "700" }}>{create.isPending ? "Saving…" : "Save"}</Text></Pressable>
@@ -231,7 +231,7 @@ export function SchedulesSheet({ visible, onClose, onNotice }: { visible: boolea
           </View>
         )}
         {list.isLoading ? <ActivityIndicator color={c.primaryText} /> : null}
-        {list.error ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>Couldn't load schedules: {list.error.message}</Text> : null}
+        {list.error ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>Couldn&apos;t load schedules: {list.error.message}</Text> : null}
         {list.data && list.data.length === 0 && !adding ? <Text style={{ color: c.muted, padding: 8 }}>Nothing scheduled.</Text> : null}
         {(list.data ?? []).map((r) => (
           <View key={r.id} style={{ paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: c.border }}>
@@ -259,7 +259,7 @@ export function TasksSheet({ visible, onClose, onOpenConversation, onNotice }: {
     <Sheet visible={visible} onClose={onClose} title="Tasks">
       <ScrollView style={{ maxHeight: 480 }}>
         {list.isLoading ? <ActivityIndicator color={c.primaryText} /> : null}
-        {list.error ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>Couldn't load tasks: {list.error.message}</Text> : null}
+        {list.error ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>Couldn&apos;t load tasks: {list.error.message}</Text> : null}
         {list.data && list.data.length === 0 ? <Text style={{ color: c.muted, padding: 12 }}>No tasks yet.</Text> : null}
         {(list.data ?? []).map((t) => (
           <View key={t.runId} style={[styles.convRow, { flexDirection: "column", alignItems: "stretch", paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: c.border }]}>
@@ -300,7 +300,7 @@ export function ContextSheet({ visible, onClose, value, onChange, currentId }: {
         <Text style={{ color: c.foreground, fontWeight: "700", marginTop: 12, marginBottom: 4 }}>Project files</Text>
         <Pressable accessibilityRole="radio" accessibilityState={{ selected: value.workspaceId === null }} onPress={() => onChange({ ...value, workspaceId: null })} style={styles.row}><Text style={{ color: value.workspaceId === null ? c.primaryText : c.foreground }}>{value.workspaceId === null ? "◉" : "○"} None</Text></Pressable>
         {wsList.map((w) => <Pressable key={w.id} accessibilityRole="radio" accessibilityState={{ selected: value.workspaceId === w.id }} onPress={() => onChange({ ...value, workspaceId: w.id })} style={styles.row}><Text numberOfLines={1} style={{ color: value.workspaceId === w.id ? c.primaryText : c.foreground }}>{value.workspaceId === w.id ? "◉" : "○"} {w.name ?? w.title ?? w.id}</Text></Pressable>)}
-        {spaces.error ? <Text style={{ color: c.muted, fontSize: 12 }}>Projects aren't available right now.</Text> : null}
+        {spaces.error ? <Text style={{ color: c.muted, fontSize: 12 }}>Projects aren&apos;t available right now.</Text> : null}
       </ScrollView>
       <Pressable accessibilityRole="button" onPress={() => { onChange({ historyMode: "conversation", conversationIds: [], workspaceId: null }); }} style={[styles.primary, { backgroundColor: c.surfaceMuted, marginTop: 10, flex: 0 }]}><Text style={{ color: c.foreground }}>Reset to default</Text></Pressable>
     </Sheet>
@@ -316,9 +316,9 @@ export function PersonalizationSheet({ visible, onClose, onNotice }: { visible: 
   return (
     <Sheet visible={visible} onClose={onClose} title="Personalization">
       {q.isLoading ? <ActivityIndicator color={c.primaryText} /> : null}
-      {q.error ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>Couldn't load preferences: {q.error.message}</Text> : null}
+      {q.error ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>Couldn&apos;t load preferences: {q.error.message}</Text> : null}
       {err ? <Text accessibilityRole="alert" style={{ color: c.errorText }}>⚠ {err}</Text> : null}
-      <Text style={{ color: c.muted, fontSize: 12, marginBottom: 4 }}>Custom instructions (shape tone and format; they can't change safety rules)</Text>
+      <Text style={{ color: c.muted, fontSize: 12, marginBottom: 4 }}>Custom instructions (shape tone and format; they can&apos;t change safety rules)</Text>
       <TextInput value={instr} onChangeText={setInstr} multiline maxLength={1500} accessibilityLabel="Custom instructions" placeholder="e.g. I'm a TypeScript developer. Prefer short answers." placeholderTextColor={c.muted} style={[styles.search, { color: c.foreground, borderColor: c.border, backgroundColor: c.background, minHeight: 100 }]} />
       <View style={{ flexDirection: "row", gap: 8, marginVertical: 10 }}>
         {(["concise", "balanced", "detailed"] as const).map((st) => <Pressable key={st} accessibilityRole="radio" accessibilityState={{ selected: style === st }} onPress={() => setStyle(st)} style={[styles.tab, { backgroundColor: style === st ? c.surfaceMuted : "transparent", borderColor: c.border }]}><Text style={{ color: style === st ? c.primaryText : c.muted, fontWeight: "600" }}>{st}</Text></Pressable>)}
@@ -358,7 +358,7 @@ export function MoreSheet({ message, onClose, onPrompt, onReport, onNotice }: { 
         <Pressable accessibilityRole="button" disabled={!val.trim()} style={[styles.primary, { backgroundColor: c.primary, opacity: val.trim() ? 1 : 0.5 }]} onPress={() => { onPrompt(`Translate this into ${val.trim()}, keeping formatting:\n${quote(message.content)}`); onClose(); }}><Text style={{ color: c.primaryForeground, fontWeight: "700" }}>Translate</Text></Pressable></View>)}
       {mode === "report" && (<View style={{ gap: 8 }}><TextInput value={val} onChangeText={setVal} placeholder="What was wrong with this response?" placeholderTextColor={c.muted} multiline autoFocus maxLength={500} accessibilityLabel="Describe the problem" style={[styles.search, { color: c.foreground, borderColor: c.border, backgroundColor: c.background, minHeight: 80 }]} />
         <Pressable accessibilityRole="button" disabled={!val.trim()} style={[styles.primary, { backgroundColor: c.primary, opacity: val.trim() ? 1 : 0.5 }]} onPress={() => { onReport(message.id, val.trim()); onClose(); }}><Text style={{ color: c.primaryForeground, fontWeight: "700" }}>Submit report</Text></Pressable>
-        <Text style={{ color: c.muted, fontSize: 12 }}>Saved as "not helpful" feedback with your note on this response.</Text></View>)}
+        <Text style={{ color: c.muted, fontSize: 12 }}>Saved as &quot;not helpful&quot; feedback with your note on this response.</Text></View>)}
     </Sheet>
   );
 }
