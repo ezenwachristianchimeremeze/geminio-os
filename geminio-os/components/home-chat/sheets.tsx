@@ -195,12 +195,12 @@ export function CodeRunSheet({ run, onClose }: { run: { language: string; code: 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 function isValidTime(value: string): boolean {
-  const match = /^(\\d{2}):(\\d{2})$/.exec(value);
+  const match = /^(\d{2}):(\d{2})$/.exec(value);
   return !!match && Number(match[1]) < 24 && Number(match[2]) < 60;
 }
 
 function isValidDate(value: string): boolean {
-  const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(value);
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!match) return false;
   const year = Number(match[1]); const month = Number(match[2]); const day = Number(match[3]);
   const date = new Date(Date.UTC(year, month - 1, day));
