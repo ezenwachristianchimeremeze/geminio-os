@@ -73,7 +73,7 @@ export function ConversationMenu({ target, onClose, onChanged, onDeleted, onNoti
   const shareUrl = (t: string) => `${Platform.OS === "web" && typeof window !== "undefined" ? window.location.origin : (process.env.EXPO_PUBLIC_API_BASE_URL ?? "")}/shared/${t}`;
   const doExport = (format: "markdown" | "json") => run(async () => {
     const r = await exp.mutateAsync({ id: target.id, format });
-    if (Platform.OS === "web" && typeof document !== "undefined") { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([r.content], { type: r.mimeType })); a.download = r.filename; a.click(); URL.revokeObjectURL(a.href); onNotice(`Exported ${r.filename}`); }
+    if (Platform.OS === "web" && typeof document !== "undefined") { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([r.content], { type: r.mimeType })); a.download = r.filename; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); onNotice(`Exported ${r.filename}`); }
     else { const { copyText } = await import("@/lib/home-chat/platform"); onNotice((await copyText(r.content)) ? `Export copied to clipboard (${r.filename})` : "Export is ready but this device can&apos;t copy it."); }
   });
   return (
@@ -92,7 +92,7 @@ export function ConversationMenu({ target, onClose, onChanged, onDeleted, onNoti
       {mode === "rename" && (
         <View style={{ gap: 8 }}>
           <TextInput value={title} onChangeText={setTitle} maxLength={120} autoFocus accessibilityLabel="Conversation title" style={[styles.search, { color: c.foreground, borderColor: c.border, backgroundColor: c.background }]} />
-          <Pressable accessibilityRole="button" disabled={busy || !title.trim()} style={[styles.primary, { backgroundColor: c.primary, opacity: busy || !title.trim() ? 0.5 : 1 }]} onPress={() => run(() => rename.mutateAsync({ id: target.id, title }), "Renamed")}><Text style={{ color: c.primaryForeground, fontWeight: "700" }}>Save</Text></Pressable>
+          <Pressable accessibilityRole="button" disabled={busy || !title.trim()} style={[styles.primary, { backgroundColor: c.primary, opacity: busy || !title.trim() ? 0.5 : 1 }]} onPress={() => run(() => rename.mutateAsync({ id: target.id, title: title.trim() }), "Renamed")}><Text style={{ color: c.primaryForeground, fontWeight: "700" }}>Save</Text></Pressable>
         </View>
       )}
       {mode === "share" && (
@@ -193,6 +193,20 @@ export function CodeRunSheet({ run, onClose }: { run: { language: string; code: 
 
 // ---------------- schedules ----------------
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+function isValidTime(value: string): boolean {
+  const match = /^(\\d{2}):(\\d{2})$/.exec(value);
+  return !!match && Number(match[1]) < 24 && Number(match[2]) < 60;
+}
+
+function isValidDate(value: string): boolean {
+  const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(value);
+  if (!match) return false;
+  const year = Number(match[1]); const month = Number(match[2]); const day = Number(match[3]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
 export function SchedulesSheet({ visible, onClose, onNotice }: { visible: boolean; onClose: () => void; onNotice: (m: string) => void }) {
   const c = useColors(); const utils = trpc.useUtils();
   const list = trpc.homeChat.schedules.list.useQuery(undefined, { enabled: visible });
@@ -200,11 +214,29 @@ export function SchedulesSheet({ visible, onClose, onNotice }: { visible: boolea
   const [adding, setAdding] = useState(false); const [kind, setKind] = useState<"reminder" | "prompt">("reminder"); const [title, setTitle] = useState(""); const [prompt, setPrompt] = useState("");
   const [time, setTime] = useState("09:00"); const [rep, setRep] = useState<"once" | "daily" | "weekly">("daily"); const [days, setDays] = useState<number[]>([1]); const [date, setDate] = useState(""); const [err, setErr] = useState<string | null>(null);
   const tz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; } catch { return "UTC"; } })();
-  const reset = () => { setAdding(false); setTitle(""); setPrompt(""); setErr(null); };
+  const reset = () => {
+    setAdding(false); setKind("reminder"); setTitle(""); setPrompt("");
+    setTime("09:00"); setRep("daily"); setDays([1]); setDate(""); setErr(null);
+  };
   const save = async () => {
     setErr(null);
+    const cleanTitle = title.trim();
+    const cleanPrompt = prompt.trim();
+    if (!cleanTitle) { setErr("Enter a title."); return; }
+    if (kind === "prompt" && !cleanPrompt) { setErr("Describe what Geminio should do."); return; }
+    if (!isValidTime(time)) { setErr("Enter a valid time in 24-hour HH:MM format."); return; }
+    if (rep === "once" && !isValidDate(date)) { setErr("Enter a valid date in YYYY-MM-DD format."); return; }
+    if (rep === "weekly" && days.length === 0) { setErr("Choose at least one day."); return; }
     try {
-      await create.mutateAsync({ kind, title, prompt: kind === "prompt" ? prompt : null, recurrence: rep === "weekly" ? { kind: "weekly", days } : { kind: rep }, timezone: tz, timeOfDay: time, onceDate: rep === "once" ? date : undefined });
+      await create.mutateAsync({
+        kind,
+        title: cleanTitle,
+        prompt: kind === "prompt" ? cleanPrompt : null,
+        recurrence: rep === "weekly" ? { kind: "weekly", days: [...new Set(days)].sort((a, b) => a - b) } : { kind: rep },
+        timezone: tz,
+        timeOfDay: time,
+        onceDate: rep === "once" ? date : undefined,
+      });
       await utils.homeChat.schedules.list.invalidate(); onNotice("Schedule saved"); reset();
     } catch (e) { setErr(e instanceof Error ? e.message : "Couldn&apos;t save."); }
   };
