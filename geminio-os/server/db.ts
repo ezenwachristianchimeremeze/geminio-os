@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users } from "../drizzle/schema";
 import { ENV } from "./_core/env";
+import { getSupabaseGoogleUser, upsertGoogleLastSignedIn } from "./supabase-auth-store";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -19,6 +20,10 @@ export async function getDb() {
 }
 
 export async function upsertUser(user: InsertUser): Promise<void> {
+  if (user.openId?.startsWith("google:")) {
+    if (user.lastSignedIn) await upsertGoogleLastSignedIn(user.openId, user.lastSignedIn);
+    return;
+  }
   if (!user.openId) {
     throw new Error("User openId is required for upsert");
   }
@@ -78,6 +83,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
 }
 
 export async function getUserByOpenId(openId: string) {
+  if (openId.startsWith("google:")) return getSupabaseGoogleUser(openId);
   const db = await getDb();
   if (!db) {
     console.warn("[Database] Cannot get user: database not available");

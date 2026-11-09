@@ -5,13 +5,14 @@ import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
-import { Platform, Text, View } from "react-native";
+import { Platform } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { MemoryProvider } from "@/lib/memory-context";
 import { DataProvider } from "@/lib/data-context";
 import { ErrorBoundary } from "@/app/error-boundary";
+import { BrandLoadingScreen } from "@/components/brand-loading-screen";
 import { VoiceOSProvider } from "@/lib/voice-os-context";
 import { PermissionsProvider } from "@/lib/permissions-context";
 import { MediaStudioProvider } from "@/lib/media-studio-context";
@@ -44,9 +45,10 @@ function RootLayoutContent({
 
   if (isLoading) {
     return (
-      <View className="flex-1 bg-background items-center justify-center">
-        <Text className="text-foreground">Loading...</Text>
-      </View>
+      <>
+        <BrandLoadingScreen />
+        <StatusBar style="light" backgroundColor="#080D1B" />
+      </>
     );
   }
 
@@ -54,6 +56,8 @@ function RootLayoutContent({
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="welcome" />
           <Stack.Screen name="auth-screen" />
           <Stack.Screen name="auth/[flow]" />
           <Stack.Screen name="(tabs)" />

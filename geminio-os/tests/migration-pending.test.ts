@@ -38,6 +38,8 @@ describe("staged migrations", () => {
   });
   it("pending directory is not journaled (so drizzle-kit migrate cannot apply hand-written SQL by accident)", () => {
     const journal = readFileSync("drizzle/meta/_journal.json", "utf8");
-    expect(journal).not.toMatch(/0010_|0011_|0012_/);
+    const journalTags = (JSON.parse(journal) as { entries: { tag: string }[] }).entries.map((entry) => entry.tag);
+    const pendingTags = pendingFiles.map((file) => file.replace(/\.sql$/, ""));
+    expect(pendingTags.filter((tag) => journalTags.includes(tag))).toEqual([]);
   });
 });

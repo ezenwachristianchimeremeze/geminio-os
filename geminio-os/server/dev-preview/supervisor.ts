@@ -103,7 +103,7 @@ const ACTIVE: RunnerJobState[] = ["created", "queued", "starting", "preparing", 
 const DEV_POLICY: ExecutionPolicy = { ...SAFE_DEFAULT_EXECUTION_POLICY, timeoutMs: 30 * 60_000, concurrentJobs: 1, processCount: 64, memoryMb: 4096, allowedNetworkHosts: ["127.0.0.1", "localhost"] };
 
 function defaultSpawn(command: string, args: readonly string[], options: { cwd: string; env: Record<string, string | undefined>; detached: boolean }): ChildLike {
-  return nodeSpawn(command, [...args], { cwd: options.cwd, env: options.env, detached: options.detached, shell: false, stdio: ["ignore", "pipe", "pipe"] }) as unknown as ChildLike;
+  return nodeSpawn(command, [...args], { cwd: options.cwd, env: options.env as NodeJS.ProcessEnv, detached: options.detached, shell: false, stdio: ["ignore", "pipe", "pipe"] }) as unknown as ChildLike;
 }
 
 const defaultProbe: ProbeFn = async (url) => {
@@ -337,7 +337,7 @@ export class DevPreviewSupervisor {
   }
 
   private launchDevServer(token: number) {
-    const child = this.opts.spawn(PREVIEW_COMMANDS.run[0], PREVIEW_COMMANDS.run.slice(1), { cwd: this.opts.cwd, env: { ...this.opts.env, NODE_ENV: "development", CI: "1" }, detached: true });
+    const child = this.opts.spawn(PREVIEW_COMMANDS.run[0], PREVIEW_COMMANDS.run.slice(1), { cwd: this.opts.cwd, env: { ...this.opts.env, NODE_ENV: "development", CI: "1" } as NodeJS.ProcessEnv, detached: true });
     this.child = child;
     const onData = (chunk: Buffer | string) => {
       if (token !== this.runToken) return;

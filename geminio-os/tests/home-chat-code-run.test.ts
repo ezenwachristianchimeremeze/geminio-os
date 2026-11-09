@@ -13,15 +13,15 @@ describe("code run policy", () => {
   });
   it("validates code before calling the sandbox", async () => {
     let called = 0; const r: SandboxRunner = { name: "x", run: async () => { called++; return { stdout: "", stderr: "", exitCode: 0, timedOut: false, durationMs: 0 }; } };
-    expect((await runCode(r, { language: "js", code: "  " })).status).toBe("invalid");
-    expect((await runCode(r, { language: "js", code: "x".repeat(CODE_LIMITS.maxCodeChars + 1) })).status).toBe("invalid");
+    expect((await runCode(r, { language: "javascript", code: "  " })).status).toBe("invalid");
+    expect((await runCode(r, { language: "javascript", code: "x".repeat(CODE_LIMITS.maxCodeChars + 1) })).status).toBe("invalid");
     expect(called).toBe(0);
   });
   it("returns output, truncates huge output and redacts secret-looking strings", async () => {
-    expect(await runCode(ok(), { language: "js", code: "console.log('hi')" })).toMatchObject({ status: "ok", stdout: "hi\n", exitCode: 0 });
-    const big = await runCode(ok({ stdout: "a".repeat(CODE_LIMITS.maxOutputChars + 50) }), { language: "js", code: "x" });
+    expect(await runCode(ok(), { language: "javascript", code: "console.log('hi')" })).toMatchObject({ status: "ok", stdout: "hi\n", exitCode: 0 });
+    const big = await runCode(ok({ stdout: "a".repeat(CODE_LIMITS.maxOutputChars + 50) }), { language: "javascript", code: "x" });
     expect(big).toMatchObject({ status: "ok", truncated: true });
-    const sec = await runCode(ok({ stdout: "key sk-abcdefghijklmnopqrstuv and password=hunter22222" }), { language: "js", code: "x" });
+    const sec = await runCode(ok({ stdout: "key sk-abcdefghijklmnopqrstuv and password=hunter22222" }), { language: "javascript", code: "x" });
     expect((sec as any).stdout).not.toContain("sk-abcdef"); expect((sec as any).stdout).not.toContain("hunter2");
   });
   it("reports non-zero exit and timeouts as results (not as success of the program)", async () => {
@@ -30,8 +30,8 @@ describe("code run policy", () => {
   });
   it("maps provider failures honestly", async () => {
     const boom = (status?: number): SandboxRunner => ({ name: "b", run: async () => { throw Object.assign(new Error("x"), status ? { status } : {}); } });
-    expect(await runCode(boom(401), { language: "js", code: "1" })).toMatchObject({ status: "failed", retryable: false });
-    expect(await runCode(boom(503), { language: "js", code: "1" })).toMatchObject({ status: "failed", retryable: true });
+    expect(await runCode(boom(401), { language: "javascript", code: "1" })).toMatchObject({ status: "failed", retryable: false });
+    expect(await runCode(boom(503), { language: "javascript", code: "1" })).toMatchObject({ status: "failed", retryable: true });
   });
 });
 describe("HTTP sandbox adapter", () => {
@@ -44,8 +44,8 @@ describe("HTTP sandbox adapter", () => {
   });
   it("rejects malformed responses and HTTP errors", async () => {
     const bad = new HttpSandboxRunner({ url: "https://s.test", key: "k" }, (async () => new Response(JSON.stringify({ nope: 1 }), { status: 200 })) as unknown as typeof fetch);
-    await expect(bad.run({ language: "js", code: "1", timeoutMs: 1 })).rejects.toThrow("invalid response");
+    await expect(bad.run({ language: "javascript", code: "1", timeoutMs: 1 })).rejects.toThrow("invalid response");
     const err = new HttpSandboxRunner({ url: "https://s.test", key: "k" }, (async () => new Response("", { status: 500 })) as unknown as typeof fetch);
-    await expect(err.run({ language: "js", code: "1", timeoutMs: 1 })).rejects.toThrow("HTTP 500");
+    await expect(err.run({ language: "javascript", code: "1", timeoutMs: 1 })).rejects.toThrow("HTTP 500");
   });
 });

@@ -71,6 +71,13 @@
       "when": 1790813830583,
       "tag": "0009_chilly_nuke",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1793440000000,
+      "tag": "0010_email_auth",
+      "breakpoints": true
     }
   ]
 }
