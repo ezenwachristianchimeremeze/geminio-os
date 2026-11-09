@@ -126,7 +126,7 @@ export default function HomeScreen() {
             { l: h.contextSel.historyMode !== "conversation" || h.contextSel.conversationIds.length || h.contextSel.workspaceId ? "Context controls… (custom)" : "Context controls…", a: () => setCtxOpen(true) },
             { l: "Personalization…", a: () => setPrefsOpen(true) },
             { l: voiceMode ? "Voice conversation: on" : "Voice conversation: off", a: () => { setVoiceMode((v) => !v); h.stopSpeech(); } },
-            ...(h.conversationId && h.conversation ? [{ l: "Conversation actions…", a: () => setConvMenu({ id: h.conversation!.id, title: h.conversation!.title, pinned: h.conversation!.pinned, status: h.conversation!.archived ? "archived" : "active", shared: !!h.conversation!.shared, lastMessageAt: h.conversation!.updatedAt }) }] : []),
+            ...(h.conversationId && h.conversation ? [{ l: "Conversation actions…", a: () => setConvMenu({ id: h.conversation!.id, title: h.conversation!.title, pinned: h.conversation!.pinned, status: h.conversation!.status, shared: !!h.conversation!.shared, lastMessageAt: h.conversation!.lastMessageAt }) }] : []),
           ].map((it) => (
             <Pressable key={it.l} accessibilityRole="menuitem" style={styles.menuItem} onPress={() => { setMenuOpen(false); it.a(); }}><Text style={{ color: c.foreground, fontSize: 15 }}>{it.l}</Text></Pressable>
           ))}
