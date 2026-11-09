@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getRunView, sendHomeMessage, settleRun, stepsFromEvents, validateSend, type PipelineDeps, type RunDeps, type RunRecord, type SendInput, type SubmitFn } from "../server/home-chat/pipeline";
+import { getRunView, sendHomeMessage, settleRun, stepsFromEvents, summarizeRun, validateSend, type PipelineDeps, type RunDeps, type RunRecord, type SendInput, type SubmitFn } from "../server/home-chat/pipeline";
 import { getBalance, toMicro, type Reservation } from "../server/credits/ledger";
 import type { SearchProvider } from "../server/home-chat/web-search";
 import { SqliteCreditStore } from "./helpers/sqlite-credit-store";
@@ -339,7 +339,6 @@ describe("context controls in send", () => {
 });
 
 describe("task summaries", () => {
-  const { summarizeRun } = require("../server/home-chat/pipeline") as typeof import("../server/home-chat/pipeline");
   const run = (status: string, steps: string[], extra: object = {}) => ({ id: "r1", status, input: "  Compare   databases for me  ", conversationId: "c", plan: { steps: steps.map((st, i) => ({ status: st, title: `S${i + 1}`, input: { webContext: "SECRET-CONTEXT" } })) }, updatedAt: new Date(), ...extra });
   it("reports progress and allowed actions without leaking plan inputs", () => {
     const t = summarizeRun(run("executing", ["completed", "running", "pending"]));
